@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'accountancy/css/style.css' %}">
+    <title>Accountancy App</title>
+    
+</head>
+<body>
+    <div class="app-container">
+        <div class="home-container">
+            <div class="header-section">
+                <h1 class="app-title">Accountancy</h1>
+                <p class="app-subtitle">Manage your daily transactions</p>
+            </div>
+
+            <div class="main-buttons">
+                <button id="daily-entry-btn" class="btn btn-primary">
+                    <span class="btn-icon">📊</span>
+                    Daily Entry
+                </button>
+                <a href="{% url 'dashboard'%}" class="btn btn-secondary">
+                    <span class="btn-icon">📈</span>
+                    Dashboard
+                </a>
+            </div>
+
+            <div id="collection-form" class="form-card hidden">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <span class="form-icon">📅</span>
+                        Daily Collection Entry
+                    </h2>
+                </div>
+                <div class="form-content">
+                    <form id="daily-collection-form" method="POST" action="{% url 'collectionAPI' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <label for="transaction-date">Transaction Date</label>
+                            <input type="date" id="transaction-date" class="form-input" required>
+                        </div>
+
+                        <div class="payment-methods">
+                            <div class="payment-card upi-card">
+                                <div class="payment-icon">📱</div>
+                                <div class="payment-details">
+                                    <label for="upi-amount">UPI</label>
+                                    <input type="number" id="upi-amount" class="form-input" name='upi' placeholder="0" min="0">
+                                </div>
+                            </div>
+
+                            <div class="payment-card cash-card">
+                                <div class="payment-icon">💵</div>
+                                <div class="payment-details">
+                                    <label for="cash-amount">Cash</label>
+                                    <input type="number" id="cash-amount" class="form-input" name='cash' placeholder="0" min="0">
+                                </div>
+                            </div>
+
+                            <div class="payment-card card-card">
+                                <div class="payment-icon">💳</div>
+                                <div class="payment-details">
+                                    <label for="cards-amount">Cards</label>
+                                    <input type="number" id="cards-amount" class="form-input" name='card' placeholder="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="total-section">
+                            <div class="total-display">
+                                <span class="total-label">Total Amount</span>
+                                <span id="total-amount" class="total-value">₹0</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-submit">Submit Entry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="notification" class="notification hidden">
+        <span class="notification-icon">✅</span>
+        <span class="notification-message"></span>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{% static 'accountancy/JS/index.js' %}"></script>
+</body>
+
+
+</html>

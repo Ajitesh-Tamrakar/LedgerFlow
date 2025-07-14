@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Ledger - {{ dealer.party_name }}</title>
+    <link rel="stylesheet" href="{% static 'accountancy/css/test.css' %}">
+</head>
+<body>
+    <form>
+        <label for="party_selector">Choose dealer</label>
+        <select id="party_selector" name="party_id">
+        {% for dealer in dealers %}
+        <option value="{{dealer.id}}">{{dealer.party_name}}</option>
+        {% endfor %}
+        </select>
+        <button type="submit" class="submitButton">View Ledger</button>
+    </form>
+
+
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="dealer-info">
+                <h1 class="dealer-name">{{dealer_info.party_name}}</h1>
+                <p class="dealer-gst">GST: {{dealer_info.GST_num}}</p>
+            </div>
+            
+            <div class="current-balance positive">₹{{ledger_balance}}</div>
+            <div class="opening-balance">Opening Balance: ₹{{dealer_info.opening_balance}} (as of 1 Nov 2024)</div>
+        </header>
+
+        <!-- View Toggle -->
+        <section class="view-toggle">
+            <div class="toggle-buttons">
+                <button class="toggle-btn active" data-view="bills">Bills</button>
+                <button class="toggle-btn" data-view="payments">Payments</button>
+                <button class="toggle-btn" data-view="combined">Ledger</button>
+            </div>
+        </section>
+
+        <!-- Bills View -->
+        <section id="bills-view" class="view-section active">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Bills</h3>
+                    <span class="table-count">{{bill_count}} entries</span>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bill Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Image</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          {% for bill in bill_details %}
+                              <tr>
+                                <td data-label="Bill Date">{{bill.bill_date}}</td>
+                                <td data-label="Amount" class="amount">₹{{bill.bill_amount|floatformat:2}}</td>
+                                <td data-label="Status">
+                                    <span class="status-badge status-unpaid">Unpaid</span>
+                                </td>
+                                <td data-label="Image">
+                                
+                                    <button class="image-preview-btn" onclick="showImageModal('{{ bill.bill_img.url }}?height=600&amp;width=400')">
+                                        📄 View
+                                    </button>
+        
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payments View -->
+        <section id="payments-view" class="view-section">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Payments</h3>
+                    <span class="table-count">{{payment_count}} entries</span>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Payment Date</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          {% for payment in payment_entries %}
+                            <tr>
+                                <td data-label="Payment Date">{{payment.payment_date}}</td>
+                                <td data-label="Amount" class="amount">₹{{payment.payment_amount|floatformat:2}}</td>
+                                <td data-label="Payment Method">
+                                    <span class="payment-method method-bank">{{payment.payment_method}}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                           
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combined Ledger View -->
+        <section id="combined-view" class="view-section">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Combined Ledger</h3>
+                    <span class="table-count">{{ledger_length}} entries</span>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in ledger_entries %}
+                            {% if entry.type == 'Bill' %}       
+
+                            <tr>
+                                <td data-label="Date">{{entry.date}}</td>
+                                <td data-label="Description">Invoice #INV-2024-015</td>
+                                <td data-label="Type">
+                                    <span class="transaction-type type-bill">
+                                        <span class="type-icon">➕</span> Bill
+                                    </span>
+                                </td>
+                                <td data-label="Amount" class="amount">₹{{entry.amount|floatformat:2}}</td>
+                            </tr>
+                            {% else %}
+
+                            <tr>
+                                <td data-label="Date">{{entry.date}}</td>
+                                <td data-label="Description">{{entry.type}}</td>
+                                <td data-label="Type">
+                                    <span class="transaction-type type-payment">
+                                        <span class="type-icon">➖</span> Payment
+                                    </span>
+                                </td>
+                                <td data-label="Amount" class="amount">₹{{entry.amount|floatformat:2}}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeImageModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeImageModal()">×</button>
+            <img id="modalImage" src="/placeholder.svg" alt="Bill Image">
+        </div>
+    </div>
+    <script src="{% static 'accountancy/JS/test.js' %}"></script>
+</body>
+</html>

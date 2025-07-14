@@ -1,0 +1,305 @@
+{% load static %}
+{%load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'accountancy/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'accountancy/css/records.css' %}">
+    
+    <title>Records</title>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="records-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1 class="page-title">Records</h1>
+                    <p class="page-subtitle">Manage bills, parties, and payments</p>
+                </div>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Main Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn bill-btn" data-modal="add-bill">
+                <div class="action-icon">📄</div>
+                <span class="action-text">Add Bill</span>
+            </button>
+            <button class="action-btn party-btn" data-modal="add-party">
+                <div class="action-icon">👥</div>
+                <span class="action-text">Add Party</span>
+            </button>
+            <button class="action-btn payment-btn" data-modal="add-payment">
+                <div class="action-icon">💳</div>
+                <span class="action-text">Payments</span>
+            </button>
+            <button class="action-btn ledger-btn" data-modal="view-ledger">
+                <div class="action-icon">📚</div>
+                <span class="action-text">Ledger</span>
+            </button>
+        </div>
+
+        <!-- Search and Filter Section -->
+         <form method="get" >
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="card-icon">🔍</span>
+                    Search & Filter
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="search-dealer">Search Dealer</label>
+                        {{filter.form.dealer_id |add_class:'form-input'}}
+                    </div>
+                    <div class="filter-group">
+                        <label>Amount Range</label>
+                        <div class="range-inputs">
+                            {{filter.form.amount |add_class:'form-input'}}
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <div class="range-inputs">
+                            <input type="date" name="{{ filter.form.start_date.name }}" id="{{ filter.form.start_date.id }}" class="form-input" value="{{ filter.form.start_date.value|date:'Y-m-d' }}">
+                            <input type="date" name="{{ filter.form.end_date.name }}" id="{{ filter.form.end_date.id }}" class="form-input" value="{{ filter.form.end_date.value|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                    <span class="btn-icon">🔍</span>
+                    Search
+                </button>
+            </div>
+        </div>
+        </form>
+
+        <!-- Main Content Grid -->
+        <div class="records-grid">
+            <!-- Bill Gallery -->
+            <div class="gallery-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">🖼️</span>
+                            Recent Bills
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="bills-gallery" class="bills-gallery">
+                            {% for bill in filter.qs %}
+                            <div class="bill-card">
+                                <div class="bill-image" onclick="openLightbox('{{ bill.bill_img.url }}')" style="cursor: pointer;">
+                                    <img src="{{ bill.bill_img.url }}" alt="Bill image" loading="lazy">
+                                </div>
+                                <div class="bill-info">
+                                    <div class="bill-dealer">{{bill.dealer_id}}</div>
+                                    <div class="bill-amount">₹{{bill.bill_amount|floatformat:2}}</div>
+                                </div>
+                                <div class="bill-date">{{bill.bill_date}}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dealer Insights -->
+            <div class="insights-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            Dealer Insights
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="insights-content">
+                            <div class="top-dealers">
+                                <h3 class="section-title">
+                                    <span class="section-icon">🏢</span>
+                                    Top Dealers by Outstanding
+                                </h3>
+                                <div id="top-dealers-list" class="dealers-list">
+                                      {% for dealer in top_three %}
+                                            <div class="dealer-item">
+                                                <div class="dealer-info">
+                                                <div class="dealer-rank rank-{{ forloop.counter }}">{{ forloop.counter }}</div>
+                                                <div class="dealer-details">
+                                                    <div class="dealer-name">{{ dealer.dealer_name }}</div>
+                                                    <div class="dealer-gst">{{ dealer.gst_num }}</div>
+                                                </div>
+                                                </div>
+                                                <div class="dealer-outstanding">₹{{ dealer.amount|floatformat:2 }}</div>
+                                            </div>
+                            
+                                        {% endfor %}
+                        
+                                </div>
+                            </div>
+
+                            <div class="total-outstanding">
+                                <h4 class="outstanding-title">Total Outstanding</h4>
+                                <p class="outstanding-amount">₹{{total_outstanding|floatformat:2}}</p>
+                                <p class="outstanding-subtitle">Across all parties</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <!-- Add Bill Modal -->
+        <div id="add-bill-modal" class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Bill</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="add-bill-form" method="POST" action="{% url 'bill-images' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="bill-dealer">Choose Dealer</label>
+                        <select id="bill-dealer" class="form-select" name='party_id' required>
+                            {% for dealer in dealers %}
+                            <option value="{{dealer.id}}">{{dealer.party_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-image">Upload Bill</label>
+                        <div class="file-upload">
+                            <input type="file" id="bill-image" accept="image/*" class="file-input" name="bill_image" required>
+                            <div class="file-upload-display">
+                                <span class="upload-icon">📁</span>
+                                <span class="upload-text">Click to upload or drag and drop</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-date">Bill Date</label>
+                        <input type="date" id="bill-date" class="form-input" name='bill_date' required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bill-amount">Bill Amount</label>
+                        <input type="number" id="bill-amount" placeholder="Enter amount" class="form-input" name='bill-amount' >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Upload Bill</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Party Modal -->
+        <div id="add-party-modal" class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Party</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="add-party-form" method="POST" action="{% url 'create-party' %}"> 
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="party-name">Party Name</label>
+                        <input type="text" id="party-name" placeholder="Enter party name" class="form-input" name='party-name' required>
+                    </div>
+                    <div class="form-group">
+                        <label for="party-gst">GSTIN</label>
+                        <input type="text" id="party-gst" placeholder="Enter GST number" class="form-input" name='GST_num' required>
+                    </div>
+                    <div class="form-group">
+                        <label for="party-balance">Existing Balance</label>
+                        <input type="number" id="party-balance" placeholder="Enter existing balance" class="form-input" name="existing_balance">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-full">Add Party</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Payment Modal -->
+        <div id="add-payment-modal" class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Payment Entry</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="add-payment-form" method="POST" action="{% url 'payments' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="payment-dealer">Choose Dealer</label>
+                        <select id="payment-dealer" class="form-select" name='dealer_id' required>
+                            {% for dealer in dealers %}
+                            <option value="{{dealer.id}}">{{dealer.party_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-date">Payment Date</label>
+                        <input type="date" id="payment-date" class="form-input" name='payment_date' required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Amount Paid</label>
+                        <input type="number" id="payment-amount" placeholder="Enter amount" class="form-input" name='payment_amount' required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-method">Payment Method</label>
+                        <select id="payment-method" class="form-select" name='payment_method' required>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>                            
+                            <option value="NEFT">NEFT</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-full">Submit Payment</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- View Ledger Modal -->
+        <div id="view-ledger-modal" class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">View Ledger</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="view-ledger-form" method="POST" action="{% url 'ledger_request' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="ledger-dealer">Choose Dealer</label>
+                        <select id="ledger-dealer" class="form-select" name='party_id' required>
+                            {% for dealer in dealers %}
+                            <option value="{{dealer.id}}">{{dealer.party_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-info btn-full" >View Ledger</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox hidden">
+        <div class="lightbox-content">
+            <button class="lightbox-close">&times;</button>
+            <img id="lightbox-image" src="/placeholder.svg" alt="Bill preview">
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="notification" class="notification hidden">
+        <span class="notification-icon">✅</span>
+        <span class="notification-message"></span>
+    </div>
+
+    <script src="{% static 'accountancy/JS/records.js' %}"></script>
+</body>
+</html>

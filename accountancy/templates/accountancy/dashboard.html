@@ -1,0 +1,153 @@
+{%load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <link rel="stylesheet" href="{% static 'accountancy/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'accountancy/css/dashboard.css' %}">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Welcome back! Here's your business overview</p>
+                </div>
+                <a href="{% url 'records' %}" class="btn btn-secondary">Records</a>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card sales-card">
+                <div class="kpi-content">
+                    <div class="kpi-info">
+                        <p class="kpi-label">Today's Profit</p>
+                        <p class="kpi-value">₹{{today_profit}}</p>
+                        <div class="kpi-trend positive">
+                            <span class="trend-icon">↗</span>
+                            <span class="trend-text">+12% from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="kpi-icon">📈</div>
+                </div>
+            </div>
+
+            <div class="kpi-card collection-card">
+                <div class="kpi-content">
+                    <div class="kpi-info">
+                        <p class="kpi-label">Today's Collection</p>
+                        <p class="kpi-value">₹{{todays_collection}}</p>
+                        <div class="kpi-trend positive">
+                            <span class="trend-icon">↗</span>
+                            <span class="trend-text">+8% from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="kpi-icon">💰</div>
+                </div>
+            </div>
+
+            <div class="kpi-card pending-card">
+                <div class="kpi-content">
+                    <div class="kpi-info">
+                        <p class="kpi-label">Bills Came Today</p>
+                        <p class="kpi-value">{{Bill_came_today}}</p>
+                        <div class="kpi-trend negative">
+                            <span class="trend-icon">↘</span>
+                            <span class="trend-text">-3 from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="kpi-icon">📋</div>
+                </div>
+            </div>
+
+            <div class="kpi-card outstanding-card">
+                <div class="kpi-content">
+                    <div class="kpi-info">
+                        <p class="kpi-label">Outstanding</p>
+                        <p class="kpi-value">₹1,25,000</p>
+                        <div class="kpi-trend negative">
+                            <span class="trend-icon">↘</span>
+                            <span class="trend-text">-5% from last week</span>
+                        </div>
+                    </div>
+                    <div class="kpi-icon">⚠️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Charts Section -->
+            <div class="chart-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            Sales Trends
+                        </h2>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" data-view="daily">Daily</button>
+                            <button class="chart-btn" data-view="weekly">Weekly</button>
+                            <button class="chart-btn" data-view="monthly">Monthly</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="chart-container">
+                            <canvas id="sales-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="tasks-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <span class="card-icon">✅</span>
+                            Tasks
+                        </h2>
+                        <button id="add-task-btn" class="btn btn-small btn-primary">
+                            <span class="btn-icon">+</span>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div id="add-task-form" class="add-task-form hidden">
+                            <div class="task-input-group">
+                                <input type="text" id="new-task-input" placeholder="Add new task..." class="form-input">
+                                <button id="save-task-btn" class="btn btn-small btn-success">Add</button>
+                            </div>
+                        </div>
+
+                        <div id="tasks-list" class="tasks-list">
+                            <!-- Tasks will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="notification" class="notification hidden">
+        <span class="notification-icon">✅</span>
+        <span class="notification-message"></span>
+    </div>
+
+    {{ daily_list|json_script:"daily_data"}}
+    {{ weekly_list|json_script:"week_data"}}
+    {{ month_list|json_script:"month_data"}}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'accountancy/JS/dashboard.js' %}"></script>
+</body>
+
+</html>
+
+<script src="{% static  'accountancy/JS/graphs.js'%}"></script>
