@@ -204,8 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
       tasksLoaded = true; // Mark tasks as loaded
       renderTasks();
     } catch (error) {
-      console.error('Failed to load tasks:', error);
-      showNotification('Failed to load tasks', 'error');
+      // console.error('Failed to load tasks:', error);
+      // showNotification('Failed to load tasks', 'error');
     }
   }
 

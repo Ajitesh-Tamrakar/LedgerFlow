@@ -15,13 +15,31 @@ def homepage(request):
     return render(request, 'accountancy/index.html')
 
 def daily_collection(request):
-    upi = request.POST.get('upi')
-    cash = request.POST.get('cash')
-    card = request.POST.get('card')
-    total = float(upi)+float(cash)+float(card)
-    
-    DailyMoneyInputs(UPI=upi, cash=cash, cards=card, in_total = total).save()
-    return redirect('/dashboard')
+    if request.method == "POST":
+        upi = request.POST.get('upi') or 0
+        cash = request.POST.get('cash') or 0
+        card = request.POST.get('card') or 0
+        date = request.POST.get('date')
+
+        try:
+            total = int(upi) + int(cash) + int(card)
+
+            DailyMoneyInputs.objects.create(
+                UPI=upi,
+                cash=cash,
+                cards=card,
+                in_total=total,
+                date=date
+            )
+
+            return redirect('/dashboard')
+
+        except ValueError:
+            # Handle invalid numeric values gracefully
+            return HttpResponse('<h1>Unable to add data</h1>', status=500)  # Or return a rendered error template
+    else:
+        return redirect('/dashboard')  # Or handle GET if needed
+
 
         
 def dashboard(request):

@@ -15,7 +15,7 @@ class DailyMoneyInputs(models.Model):
     UPI = models.IntegerField()
     cash = models.IntegerField()
     cards = models.IntegerField()
-    date = models.DateField(default=datetime.date.today, unique=True)
+    date = models.DateField(unique=True)
     in_total = models.FloatField(default=0.0)
 
 
