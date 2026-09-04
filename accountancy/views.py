@@ -1,8 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponseRedirect, Http404, HttpResponse
-from rest_framework.decorators import api_view 
-from .models import DailyMoneyInputs, Tasklist,Dealers, Payments, Bills
-from django.utils.text import slugify
+from rest_framework.decorators import api_view
+from .models import Cashbook, Task, Dealer, Payment, Bill, Business
 from django.urls import reverse
 from datetime import date, timedelta
 from django.db.models.functions import TruncWeek, TruncMonth
@@ -11,7 +10,15 @@ from .filters import BillFilter
 from collections import Counter
 import itertools
 import json
-def homepage(request):    
+
+
+def get_current_business():
+    """TEMPORARY placeholder until auth exists. Replace every call site with
+    request.user.business once authentication is built."""
+    return Business.objects.first()
+
+
+def homepage(request):
     return render(request, 'accountancy/index.html')
 
 def daily_collection(request):
@@ -22,14 +29,14 @@ def daily_collection(request):
         date = request.POST.get('date')
 
         try:
-            total = int(upi) + int(cash) + int(card)
+            int(upi) + int(cash) + int(card)
 
-            DailyMoneyInputs.objects.create(
-                UPI=upi,
+            Cashbook.objects.create(
+                upi=upi,
                 cash=cash,
                 cards=card,
-                in_total=total,
-                date=date
+                date=date,
+                business=get_current_business()
             )
 
             return redirect('/dashboard')
@@ -41,33 +48,26 @@ def daily_collection(request):
         return redirect('/dashboard')  # Or handle GET if needed
 
 
-        
+
 def dashboard(request):
-    k = DailyMoneyInputs.objects.all()
-    for day in k:
-        date_collection = 0
-        date_collection += day.UPI
-        date_collection += day.cash
-        date_collection += day.cards
-        day.in_total = date_collection
     today = date.today()
-    collections = DailyMoneyInputs.objects.filter(date= today).values('UPI', 'cash', 'cards')
-    
+    collections = Cashbook.objects.filter(date= today).values('upi', 'cash', 'cards')
+
     #getting today's collection  expecting multiple entry per day
     todays_collection = 0
     for collection in collections:
-        todays_collection += collection['UPI']
+        todays_collection += collection['upi']
         todays_collection += collection['cash']
         todays_collection += collection['cards']
 
 
-    order_data = list(Tasklist.objects.all().values())
-    #calculating today's profit assuming 20% of today's collection 
+    order_data = list(Task.objects.all().values())
+    #calculating today's profit assuming 20% of today's collection
     today_profit = 0
     today_profit += int((todays_collection*20)/100)
 
     todays_bill = 0
-    todays_bill += Bills.objects.filter(bill_date= today).count()
+    todays_bill += Bill.objects.filter(date= today).count()
 
     #getting week worth of data
 
@@ -76,23 +76,22 @@ def dashboard(request):
     start_date= today - timedelta(week_day) #timedelta is function calculate with time (basically fuction helping with say today is moday then what's the date 3 days before )
     end_date = start_date + timedelta(6)
 
-    daily_data = DailyMoneyInputs.objects.filter(date__gte= start_date)
-    # print(daily_data.values('UPI', 'cash', 'cards'))
-    daily_data.values('UPI', 'cash', 'cards')
+    daily_data = Cashbook.objects.filter(date__gte= start_date)
+    daily_data.values('upi', 'cash', 'cards')
     daily_list = []
     for day in daily_data:
         date_collection = 0
-        date_collection += day.UPI
+        date_collection += day.upi
         date_collection += day.cash
         date_collection += day.cards
         daily_list.append(date_collection)
 
 
-    week_trunc = DailyMoneyInputs.objects.annotate(week_start=TruncWeek('date')).values('week_start').annotate(todays_collection=Sum('in_total')).order_by('week_start')
+    week_trunc = Cashbook.objects.annotate(week_start=TruncWeek('date')).values('week_start').annotate(todays_collection=Sum('total')).order_by('week_start')
     week_data = []
     for i in week_trunc:
         week_data.append(i['todays_collection'])
-    month_trunc = DailyMoneyInputs.objects.annotate(month_start=TruncMonth('date')).values('month_start').annotate(months_collection=Sum('in_total')).order_by('month_start')
+    month_trunc = Cashbook.objects.annotate(month_start=TruncMonth('date')).values('month_start').annotate(months_collection=Sum('total')).order_by('month_start')
     month_data = []
 
     for i in month_trunc:
@@ -110,17 +109,17 @@ def dashboard(request):
     })
 
 def record_page(request):
-    name_id_list = Dealers.objects.values('id', 'party_name')
-    bill_filter = BillFilter(request.GET, queryset=Bills.objects.all())
-    payments = Payments.objects.values('dealer_id').annotate(total_payments = Sum('payment_amount'))
-    bill_amounts = Bills.objects.values('dealer_id').annotate(total_bill_amount = Sum('bill_amount'))
+    name_id_list = Dealer.objects.values('id', 'name')
+    bill_filter = BillFilter(request.GET, queryset=Bill.objects.all())
+    payments = Payment.objects.values('dealer').annotate(total_payments = Sum('amount'))
+    bill_amounts = Bill.objects.values('dealer').annotate(total_bill_amount = Sum('amount'))
     payment_dict = {}
     for payment in payments:
-        payment_dict[payment['dealer_id']] = payment['total_payments']
+        payment_dict[payment['dealer']] = payment['total_payments']
         #got sum of all payment made to dealer in for dealer id : all payments
     bill_dict = {}
     for bill in bill_amounts:
-        bill_dict[bill['dealer_id']] = bill['total_bill_amount']
+        bill_dict[bill['dealer']] = bill['total_bill_amount']
         #got sum of all bill amounts got from perticular dealer in form of dealer id : total billed amount
     ledger_balace = dict(Counter(bill_dict)-Counter(payment_dict))
     print(sorted(ledger_balace.items()))
@@ -129,8 +128,8 @@ def record_page(request):
     top_three = []
     for i in top_three_id_amount:
         container_dict = {}
-        container_dict['dealer_name'] = Dealers.objects.get(id= i).party_name
-        container_dict['gst_num'] = Dealers.objects.get(id= i).GST_num
+        container_dict['dealer_name'] = Dealer.objects.get(id= i).name
+        container_dict['gst_num'] = Dealer.objects.get(id= i).gstin
         container_dict['amount'] =top_three_id_amount[i]
         top_three.append(container_dict)
     print(top_three)
@@ -146,10 +145,9 @@ def record_page(request):
 def create_party_page(request):
     if request.method == 'POST':
         partyName = request.POST.get('party-name')
-        party_slug = slugify(partyName)
         num_gst =  request.POST.get('GST_num')
         op_balance = request.POST.get("existing_balance")
-        Dealers(party_name=partyName, party_slug=party_slug,opening_balance= op_balance, GST_num = num_gst).save()
+        Dealer(name=partyName, opening_balance= op_balance, gstin = num_gst, business=get_current_business()).save()
     return HttpResponseRedirect('/records')
 
 
@@ -159,8 +157,8 @@ def bill_uploads(request):
         billDate = request.POST.get('bill_date')
         partyId = request.POST.get('party_id')
         bill_amount = request.POST.get('bill_amount')
-        dealer_obj = get_object_or_404(Dealers, id=partyId)
-        Bills(bill_img=billImg, bill_date=billDate, dealer_id=dealer_obj, bill_amount= bill_amount).save()
+        dealer_obj = get_object_or_404(Dealer, id=partyId)
+        Bill(image=billImg, date=billDate, dealer=dealer_obj, amount= bill_amount, business=get_current_business()).save()
     return HttpResponseRedirect('/records')
 
 
@@ -168,12 +166,12 @@ def bill_uploads(request):
 def payments(request):
     if request.method == 'POST':
         try:
-            dealer_id = get_object_or_404(Dealers ,id= request.POST.get('dealer_id'))
+            dealer_obj = get_object_or_404(Dealer ,id= request.POST.get('dealer_id'))
             payment_date = request.POST.get('payment_date')
             payment_amount = request.POST.get('payment_amount')
             payment_method = request.POST.get('payment_method')
-            Payments(dealer_id=dealer_id, payment_date=payment_date, payment_amount= payment_amount, payment_method=payment_method).save()
-        except: 
+            Payment(dealer=dealer_obj, date=payment_date, amount= payment_amount, method=payment_method, business=get_current_business()).save()
+        except:
             print('something was not right')
     return HttpResponseRedirect('/records')
 
@@ -190,43 +188,43 @@ def ledger_request(request):
 
 def ledger(request, requested_dealer):
 
-    name_id_dict = Dealers.objects.values('party_name', 'id')
+    name_id_dict = Dealer.objects.values('name', 'id')
     ledger_balance = 0
-    dealer_info = Dealers.objects.get(id=requested_dealer)
-    bill_details = Bills.objects.filter(dealer_id= requested_dealer)
-    payment_entries = Payments.objects.filter(dealer_id = requested_dealer)
+    dealer_info = Dealer.objects.get(id=requested_dealer)
+    bill_details = Bill.objects.filter(dealer= requested_dealer)
+    payment_entries = Payment.objects.filter(dealer = requested_dealer)
     bill_count = bill_details.count()
     payment_count = payment_entries.count()
     ledger_lenght = bill_count+payment_count
     ledger_dict = {}
     for i in bill_details:
-        ledger_dict[i.bill_date] = i
+        ledger_dict[i.date] = i
 
     for i in payment_entries:
-        ledger_dict[i.payment_date] = i
+        ledger_dict[i.date] = i
 
     ledger_entries = []
     for i, j in dict(sorted(ledger_dict.items(), reverse=True)).items():
         print(i, j)
-        if type(j).__name__ == 'Bills':
+        if type(j).__name__ == 'Bill':
             ledger_dict = {}
             ledger_dict['type'] = 'Bill'
-            ledger_dict['date'] = j.bill_date
-            ledger_dict['amount'] = j.bill_amount
-            ledger_balance += j.bill_amount
+            ledger_dict['date'] = j.date
+            ledger_dict['amount'] = j.amount
+            ledger_balance += j.amount
             ledger_dict['desc'] = ''
             ledger_entries.append(ledger_dict)
-        if type(j).__name__ == 'Payments':
+        if type(j).__name__ == 'Payment':
             ledger_dict = {}
             ledger_dict['type'] = 'Payment'
-            ledger_dict['date'] = j.payment_date
-            ledger_dict['amount'] = j.payment_amount
-            ledger_balance -= j.payment_amount
-            ledger_dict['desc'] = j.payment_method
+            ledger_dict['date'] = j.date
+            ledger_dict['amount'] = j.amount
+            ledger_balance -= j.amount
+            ledger_dict['desc'] = j.method
             ledger_entries.append(ledger_dict)
         else:
             print('unexpected Model name',type(j).__name__)
-    
+
 
 
 
@@ -246,8 +244,8 @@ def ledger(request, requested_dealer):
 
 def task_list(request):
     if request.method == 'GET':
-        task_list = Tasklist.objects.values('id', 'task', 'task_status')
-        last_task = Tasklist.objects.last()
+        task_list = Task.objects.values('id', 'title', 'is_done')
+        last_task = Task.objects.last()
         if last_task:
             return JsonResponse({'lastId': last_task.pk,'taskList':list(task_list)})
         else:
@@ -256,40 +254,40 @@ def task_list(request):
     elif request.method == 'POST':
         json_data = json.loads(request.body)
         task = json_data.get('task')
-        Tasklist(task=task).save()
+        Task(title=task, business=get_current_business()).save()
         return JsonResponse({'status': 200})
     elif request.method == 'PATCH':
         json_data = json.loads(request.body)
         task_id = json_data.get('id')
         task_action = json_data.get('task_action')
-        
+
         if task_action == 'update_status':
             print('it came here')
             try:
-                task_obj = Tasklist.objects.get(id=task_id)
-                task_obj.task_status = not task_obj.task_status  # Toggle directly
+                task_obj = Task.objects.get(id=task_id)
+                task_obj.is_done = not task_obj.is_done  # Toggle directly
                 task_obj.save()
-                return JsonResponse({'status': 'success', 'new_status': task_obj.task_status})
-            except Tasklist.DoesNotExist:
+                return JsonResponse({'status': 'success', 'new_status': task_obj.is_done})
+            except Task.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'Task not found'})
         elif task_action == 'update_task':
             try:
-                task_obj = Tasklist.objects.get(id=task_id)
-                task_obj.task = json_data.get('task')
+                task_obj = Task.objects.get(id=task_id)
+                task_obj.title = json_data.get('task')
                 task_obj.save()
-                return JsonResponse({'status': 'success', 'new_task': task_obj.task})
-            except Tasklist.DoesNotExist:
+                return JsonResponse({'status': 'success', 'new_task': task_obj.title})
+            except Task.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'Task not found'})
-            
+
     elif request.method == 'DELETE':
         json_data = json.loads(request.body)
         task_id = json_data.get('id')
         try:
-            task_obj = Tasklist(id=task_id)
+            task_obj = Task(id=task_id)
             task_obj.delete()
             return JsonResponse({'status': 'delete success'})
-        except Tasklist.DoesNotExist:
+        except Task.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Task not found'})
 
-    
+
     return JsonResponse({'something went wrong':500})

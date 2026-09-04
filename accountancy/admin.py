@@ -1,23 +1,23 @@
 from django.contrib import admin
-from .models import  Tasklist,Dealers, Payments, Bills, DailyMoneyInputs
+from .models import Task, Dealer, Payment, Bill, Cashbook
 # Register your models here.
 
 class DailyEntry(admin.ModelAdmin):
-    list_display = ('date', 'UPI', 'cash', 'cards', 'in_total')
+    list_display = ('date', 'upi', 'cash', 'cards', 'total')
 
 class OrderEntries(admin.ModelAdmin):
-    list_display = ('id', 'task', 'task_status', 'task_date')
+    list_display = ('id', 'title', 'is_done', 'created_at')
 
 class PartyDetails(admin.ModelAdmin):
-    list_display = ('id', 'party_name', 'GST_num', 'opening_balance')
+    list_display = ('id', 'name', 'gstin', 'opening_balance')
 
 class Bill_data(admin.ModelAdmin):
-    list_display = ('dealer_id', 'bill_amount', 'bill_date', 'bill_img' )
+    list_display = ('dealer', 'amount', 'date', 'image' )
 class PaymentsView(admin.ModelAdmin):
-    list_display = ('pk', 'dealer_id', 'payment_amount', 'payment_date', 'payment_method')
-    
-admin.site.register(DailyMoneyInputs, DailyEntry)
-admin.site.register(Tasklist, OrderEntries)
-admin.site.register(Dealers, PartyDetails)
-admin.site.register(Bills, Bill_data)
-admin.site.register(Payments, PaymentsView)
+    list_display = ('pk', 'dealer', 'amount', 'date', 'method')
+
+admin.site.register(Cashbook, DailyEntry)
+admin.site.register(Task, OrderEntries)
+admin.site.register(Dealer, PartyDetails)
+admin.site.register(Bill, Bill_data)
+admin.site.register(Payment, PaymentsView)
