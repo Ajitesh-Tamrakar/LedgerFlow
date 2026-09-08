@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, Dealer, Payment, Bill, Cashbook
+from .models import Task, Dealer, Payment, Bill, Cashbook, OTPCode
 # Register your models here.
 
 class DailyEntry(admin.ModelAdmin):
@@ -16,8 +16,14 @@ class Bill_data(admin.ModelAdmin):
 class PaymentsView(admin.ModelAdmin):
     list_display = ('pk', 'dealer', 'amount', 'date', 'method')
 
+class OTPCodeView(admin.ModelAdmin):
+    list_display = ('email', 'purpose', 'created_at', 'expires_at', 'attempt_count', 'consumed_at')
+    list_filter = ('purpose',)
+    readonly_fields = ('code_hash', 'created_at')
+
 admin.site.register(Cashbook, DailyEntry)
 admin.site.register(Task, OrderEntries)
 admin.site.register(Dealer, PartyDetails)
 admin.site.register(Bill, Bill_data)
 admin.site.register(Payment, PaymentsView)
+admin.site.register(OTPCode, OTPCodeView)

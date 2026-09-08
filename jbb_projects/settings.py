@@ -131,6 +131,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Per-IP ceilings for the public OTP endpoints (defence in depth; the real
+    # per-code limit is OTP['MAX_ATTEMPTS']). Scopes are set on the views.
+    'DEFAULT_THROTTLE_RATES': {
+        'otp_request': '10/hour',
+        'otp_verify': '20/hour',
+    },
 }
 
 REST_AUTH = {
@@ -156,8 +162,24 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_UNIQUE_EMAIL = True
+# Send a 6-digit code instead of a confirmation link. allauth still creates the
+# unverified EmailAddress and still calls send_confirmation_mail (registration +
+# /registration/resend-email/); the adapter swaps the link body for a code.
+# allauth's own RATE_LIMITS['confirm_email'] (1 / 3 min / email) gates resends.
+ACCOUNT_ADAPTER = 'accountancy.adapter.CodeEmailAdapter'
+
+# One-time-code engine (accountancy/otp.py). Every value has a matching default
+# in that module; this block is the single place to tune them.
+OTP = {
+    'CODE_LENGTH': 6,
+    'MAX_ATTEMPTS': 5,
+    'RESEND_COOLDOWN_SECONDS': 60,
+    'VERIFY_EMAIL_TTL_MINUTES': 15,
+    'PASSWORD_RESET_TTL_MINUTES': 10,
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # dev only
+DEFAULT_FROM_EMAIL = 'LedgerFlow <no-reply@ledgerflow.local>'
 
 
 # Internationalization

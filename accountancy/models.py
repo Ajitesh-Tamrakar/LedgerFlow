@@ -115,3 +115,32 @@ class Task(models.Model):
     created_at = models.DateField(auto_now_add=True)
     is_done = models.BooleanField(default=False)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
+
+
+# --- Auth support (not part of the ledger domain schema) ---------------------
+# Stateless one-time codes for email verification and password reset. This is
+# the DB-row equivalent of what allauth's by-code flow keeps in request.session
+# -- we don't use that flow because it needs a session cookie the API clients
+# don't carry. No django-simple-history: transient, non-financial.
+
+class OTPCode(models.Model):
+    PURPOSE_VERIFY_EMAIL = 'verify_email'
+    PURPOSE_PASSWORD_RESET = 'password_reset'
+    PURPOSE_CHOICES = [
+        (PURPOSE_VERIFY_EMAIL, 'Email verification'),
+        (PURPOSE_PASSWORD_RESET, 'Password reset'),
+    ]
+
+    email = models.EmailField()
+    code_hash = models.CharField(max_length=64)  # HMAC-SHA256 hex digest, never the plaintext
+    purpose = models.CharField(max_length=32, choices=PURPOSE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempt_count = models.PositiveSmallIntegerField(default=0)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['email', 'purpose'])]
+
+    def __str__(self):
+        return f'{self.get_purpose_display()} code for {self.email}'

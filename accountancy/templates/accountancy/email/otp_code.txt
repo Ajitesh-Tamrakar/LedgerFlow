@@ -1,0 +1,6 @@
+{{ label }}
+
+Your one-time code is: {{ code }}
+
+It expires in {{ ttl_minutes }} minutes. Enter it in the app to continue.
+If you didn't request this, you can ignore this email.
