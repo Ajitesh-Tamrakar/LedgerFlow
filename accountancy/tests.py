@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accountancy.models import Business, Dealer, OTPCode
+from accountancy.models import Business, Dealer, OTPCode, Task
 
 User = get_user_model()
 
@@ -225,6 +225,16 @@ class DealerAPITests(TestCase):
         got = [r['name'] for r in self.client.get(self.LIST, {'is_active': 'true'}).data['results']]
         self.assertEqual(got, ['Acme'])
 
+    # --- default ordering (pagination needs a deterministic sort) ---
+    def test_list_is_ordered_by_name_by_default(self):
+        Dealer.objects.create(name='Zeta', business=self.biz_a)
+        Dealer.objects.create(name='Beta', business=self.biz_a)
+        as_user(self.client, self.a)
+        names = [r['name'] for r in self.client.get(self.LIST).data['results']]
+        self.assertEqual(names, ['Acme', 'Beta', 'Zeta'])
+        names = [r['name'] for r in self.client.get(self.LIST, {'ordering': '-name'}).data['results']]
+        self.assertEqual(names, ['Zeta', 'Beta', 'Acme'])
+
     # --- permission pair (IsAuthenticated + HasBusiness) ---
     def test_no_token_is_401(self):
         self.assertEqual(self.client.get(self.LIST).status_code, 401)
@@ -232,3 +242,60 @@ class DealerAPITests(TestCase):
     def test_user_without_business_is_403(self):
         as_user(self.client, User.objects.create_user('loner', 'loner@example.com', 'pw'))
         self.assertEqual(self.client.get(self.LIST).status_code, 403)
+
+
+class TaskAPITests(TestCase):
+    """Only the parts that differ from Dealer -- the base itself is proven by DealerAPITests."""
+
+    LIST = '/api/tasks/'
+
+    def setUp(self):
+        self.a = User.objects.create_user('ta', 'ta@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('tb', 'tb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.t_a = Task.objects.create(title='Call supplier', business=self.biz_a)
+        self.t_b = Task.objects.create(title='B only', business=self.biz_b)
+        self.client = APIClient()
+
+    # --- the reason Task is its own case: DELETE is on ---
+    def test_delete_removes_the_task(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.delete(f'{self.LIST}{self.t_a.pk}/').status_code, 204)
+        self.assertFalse(Task.objects.filter(pk=self.t_a.pk).exists())
+
+    def test_cannot_delete_another_businesss_task(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.delete(f'{self.LIST}{self.t_b.pk}/').status_code, 404)
+        self.assertTrue(Task.objects.filter(pk=self.t_b.pk).exists())
+
+    def test_put_is_still_405(self):
+        as_user(self.client, self.a)
+        resp = self.client.put(f'{self.LIST}{self.t_a.pk}/', {'title': 'x'}, format='json')
+        self.assertEqual(resp.status_code, 405)
+
+    # --- serializer: title required + non-blank (the model allows blank) ---
+    def test_blank_or_missing_title_rejected(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.post(self.LIST, {'title': ''}, format='json').status_code, 400)
+        self.assertEqual(self.client.post(self.LIST, {'title': '   '}, format='json').status_code, 400)
+        self.assertEqual(self.client.post(self.LIST, {}, format='json').status_code, 400)
+
+    # --- PATCH replaces the old task_action string dispatch ---
+    def test_patch_toggles_done_and_edits_title(self):
+        as_user(self.client, self.a)
+        self.client.patch(f'{self.LIST}{self.t_a.pk}/', {'is_done': True}, format='json')
+        self.t_a.refresh_from_db()
+        self.assertTrue(self.t_a.is_done)
+        self.client.patch(f'{self.LIST}{self.t_a.pk}/', {'title': 'Renamed'}, format='json')
+        self.t_a.refresh_from_db()
+        self.assertEqual(self.t_a.title, 'Renamed')
+
+    # --- base still applies to Task (scoping + create stamp) ---
+    def test_list_scoped_and_create_stamps_business(self):
+        as_user(self.client, self.a)
+        titles = [r['title'] for r in self.client.get(self.LIST).data['results']]
+        self.assertEqual(titles, ['Call supplier'])
+        resp = self.client.post(self.LIST, {'title': 'New', 'business': self.biz_b.pk}, format='json')
+        self.assertEqual(resp.status_code, 201, resp.data)
+        self.assertEqual(Task.objects.get(title='New').business, self.biz_a)

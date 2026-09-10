@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accountancy.models import Dealer
+from accountancy.models import Dealer, Task
 
 
 class DealerSerializer(serializers.ModelSerializer):
@@ -23,3 +23,12 @@ class DealerSerializer(serializers.ModelSerializer):
         if clash.exists():
             raise serializers.ValidationError("You already have a dealer with this name.")
         return value
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(max_length=500)  # model allows blank; the API requires it
+
+    class Meta:
+        model = Task
+        fields = ["id", "title", "is_done", "created_at"]
+        read_only_fields = ["id", "created_at"]
