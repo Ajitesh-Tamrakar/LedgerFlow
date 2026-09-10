@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import reverse
 from rest_framework import serializers
 
-from accountancy.models import Bill, Business, Dealer, Payment, Task
+from accountancy.models import Bill, Business, Cashbook, Dealer, Payment, Task
 
 
 class DealerScopedMixin:
@@ -81,3 +81,17 @@ class BusinessSerializer(serializers.ModelSerializer):
         model = Business
         fields = ["id", "name", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class CashbookSerializer(serializers.ModelSerializer):
+    # DRF has no mapping for a GeneratedField -- declare it so it's a proper
+    # read-only DecimalField (string-coerced output, like the other money fields).
+    total = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = Cashbook
+        fields = ["id", "date", "upi", "cash", "cards", "total",
+                  "created_at", "updated_at"]
+        # date comes from the URL on PUT (injected by the view); total is the DB
+        # GeneratedField -- both read-only, never accepted from the body.
+        read_only_fields = ["id", "date", "created_at", "updated_at"]

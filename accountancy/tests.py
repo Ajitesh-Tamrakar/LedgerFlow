@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accountancy.models import Bill, Business, Dealer, OTPCode, Payment, Task
+from accountancy.models import Bill, Business, Cashbook, Dealer, OTPCode, Payment, Task
 
 User = get_user_model()
 
@@ -511,3 +511,80 @@ class BusinessAPITests(TestCase):
         self.assertEqual(self.client.get(self.URL).status_code, 401)
         as_user(self.client, User.objects.create_user('bzl', 'bzl@example.com', 'pw'))
         self.assertEqual(self.client.get(self.URL).status_code, 403)
+
+
+class CashbookAPITests(TestCase):
+    """Addressed by date, not id: PUT upserts, GET/DELETE 404 a missing day."""
+
+    LIST = '/api/cashbook/'
+    DAY = '/api/cashbook/by-date/2026-02-01/'
+
+    def setUp(self):
+        self.a = User.objects.create_user('ca', 'ca@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('cb', 'cb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.client = APIClient()
+        as_user(self.client, self.a)
+
+    def put_day(self, url=None, **amounts):
+        body = {'upi': '0', 'cash': '0', 'cards': '0'}
+        body.update({k: str(v) for k, v in amounts.items()})
+        return self.client.put(url or self.DAY, body, format='json')
+
+    def test_get_missing_day_is_404(self):
+        self.assertEqual(self.client.get(self.DAY).status_code, 404)
+
+    def test_put_creates_then_replaces_same_row(self):
+        resp = self.put_day(upi=100, cash=50)
+        self.assertEqual(resp.status_code, 201, resp.data)
+        self.assertEqual(resp.data['total'], '150.00')
+        resp = self.put_day(upi=200, cards=25)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['total'], '225.00')
+        self.assertEqual(
+            Cashbook.objects.filter(business=self.biz_a, date='2026-02-01').count(), 1
+        )
+
+    def test_put_is_idempotent(self):
+        self.put_day(upi=10, cash=20, cards=30)
+        resp = self.put_day(upi=10, cash=20, cards=30)          # again -- no error, no dup
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            Cashbook.objects.filter(business=self.biz_a, date='2026-02-01').count(), 1
+        )
+
+    def test_delete_then_get_404(self):
+        self.put_day(upi=5)
+        self.assertEqual(self.client.delete(self.DAY).status_code, 204)
+        self.assertEqual(self.client.get(self.DAY).status_code, 404)
+
+    def test_no_post_no_patch(self):
+        self.assertEqual(self.client.post(self.LIST, {'upi': 1}, format='json').status_code, 405)
+        self.put_day(upi=1)
+        self.assertEqual(self.client.patch(self.DAY, {'upi': '2'}, format='json').status_code, 405)
+
+    def test_bad_date_in_url_is_404(self):
+        self.assertEqual(self.client.get('/api/cashbook/by-date/banana/').status_code, 404)
+
+    def test_total_is_server_computed_and_uneditable(self):
+        resp = self.client.put(self.DAY, {'upi': '7', 'cash': '3', 'cards': '0', 'total': '999'},
+                               format='json')
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(resp.data['total'], '10.00')            # not 999
+
+    def test_scoped_by_business(self):
+        self.put_day(upi=9)
+        as_user(self.client, self.b)
+        self.assertEqual(self.client.get(self.DAY).status_code, 404)   # B has no row that date
+        self.assertEqual(self.client.get(self.LIST).data['count'], 0)
+
+    def test_list_date_range(self):
+        for d in ('2026-01-05', '2026-02-01', '2026-03-10'):
+            self.put_day(url=f'/api/cashbook/by-date/{d}/', upi=1)
+        self.assertEqual(self.client.get(self.LIST).data['count'], 3)
+        self.assertEqual(self.client.get(self.LIST, {'date_from': '2026-02-01'}).data['count'], 2)
+        self.assertEqual(self.client.get(self.LIST, {'date_to': '2026-01-31'}).data['count'], 1)
+
+    def test_negative_amount_rejected(self):
+        self.assertEqual(self.put_day(upi=-5).status_code, 400)

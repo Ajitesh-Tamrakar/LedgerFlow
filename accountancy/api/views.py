@@ -1,14 +1,15 @@
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from rest_framework.decorators import action
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 
 from accountancy.api.base import BusinessScopedMixin, BusinessScopedViewSet
-from accountancy.api.filters import BillFilter, DealerFilter, PaymentFilter
+from accountancy.api.filters import BillFilter, CashbookFilter, DealerFilter, PaymentFilter
 from accountancy.api.serializers import (
-    BillSerializer, BusinessSerializer, DealerSerializer, PaymentSerializer, TaskSerializer,
+    BillSerializer, BusinessSerializer, CashbookSerializer, DealerSerializer,
+    PaymentSerializer, TaskSerializer,
 )
-from accountancy.models import Bill, Dealer, Payment, Task
+from accountancy.models import Bill, Cashbook, Dealer, Payment, Task
 
 
 class DealerViewSet(BusinessScopedViewSet):
@@ -66,3 +67,49 @@ class BusinessView(BusinessScopedMixin, RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user.business
+
+
+class CashbookListView(BusinessScopedMixin, ListAPIView):
+    serializer_class = CashbookSerializer
+    filterset_class = CashbookFilter
+    ordering = ["-date", "-id"]
+    ordering_fields = ["date", "total"]
+
+    def get_queryset(self):  # the mixin has no get_queryset -- scope here
+        return Cashbook.objects.filter(business=self.business)
+
+
+class CashbookByDateView(BusinessScopedMixin, GenericAPIView):
+    """Addressed by date, not id. PUT is create-or-replace (idempotent);
+    GET and DELETE 404 on a day with no entry. No POST, no PATCH."""
+
+    serializer_class = CashbookSerializer
+    http_method_names = ["get", "put", "delete", "head", "options"]
+
+    def _row(self):
+        return Cashbook.objects.filter(
+            business=self.business, date=self.kwargs["date"]
+        ).first()
+
+    def get(self, request, date):
+        row = self._row()
+        if row is None:
+            raise Http404
+        return Response(self.get_serializer(row).data)
+
+    def put(self, request, date):
+        row = self._row()
+        serializer = self.get_serializer(row, data=request.data)  # row=None -> create
+        serializer.is_valid(raise_exception=True)
+        serializer.save(business=self.business, date=date)
+        # GeneratedField `total` is recomputed by the DB but not refreshed in
+        # memory on UPDATE -- pull it back before serializing the response.
+        serializer.instance.refresh_from_db(fields=["total"])
+        return Response(serializer.data, status=200 if row else 201)
+
+    def delete(self, request, date):
+        row = self._row()
+        if row is None:
+            raise Http404
+        row.delete()
+        return Response(status=204)

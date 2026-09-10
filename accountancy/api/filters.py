@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from accountancy.models import Bill, Dealer, Payment
+from accountancy.models import Bill, Cashbook, Dealer, Payment
 
 
 class DealerFilter(django_filters.FilterSet):
@@ -33,3 +33,12 @@ class PaymentFilter(django_filters.FilterSet):
     class Meta:
         model = Payment
         fields = ["dealer", "method"]      # ?dealer=<id>, ?method=upi (ChoiceFilter from the enum)
+
+
+class CashbookFilter(django_filters.FilterSet):
+    date_from = django_filters.DateFilter(field_name="date", lookup_expr="gte")
+    date_to = django_filters.DateFilter(field_name="date", lookup_expr="lte")
+
+    class Meta:
+        model = Cashbook
+        fields = []       # only the two explicit date filters
