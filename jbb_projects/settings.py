@@ -137,6 +137,16 @@ REST_FRAMEWORK = {
         'otp_request': '10/hour',
         'otp_verify': '20/hour',
     },
+    # Filtering (?is_active=, ?search=, per-FilterSet) and sorting (?ordering=)
+    # for every list endpoint. django-filter does the filtering; OrderingFilter
+    # does the sort -- django-filter has no sort of its own.
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    # List responses are {count, next, previous, results: [...]}, 50 per page.
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
 }
 
 REST_AUTH = {

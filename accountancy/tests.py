@@ -7,8 +7,9 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from accountancy.models import Business, OTPCode
+from accountancy.models import Business, Dealer, OTPCode
 
 User = get_user_model()
 
@@ -151,3 +152,83 @@ class AuthFlowTests(TestCase):
         resp = client.post(RESET_REQUEST_URL, {'email': 'nobody@example.com'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
         self.assertEqual(len(mail.outbox), 0)
+
+
+def as_user(client, user):
+    token = RefreshToken.for_user(user).access_token
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+
+
+class DealerAPITests(TestCase):
+    LIST = '/api/dealers/'
+
+    def setUp(self):
+        self.a = User.objects.create_user('a', 'a@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('b', 'b@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.d_a = Dealer.objects.create(name='Acme', business=self.biz_a)
+        self.d_b = Dealer.objects.create(name='Globex', business=self.biz_b)
+        self.client = APIClient()
+
+    # --- scoping (get_queryset) ---
+    def test_list_shows_only_own_business(self):
+        as_user(self.client, self.a)
+        resp = self.client.get(self.LIST)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual([r['name'] for r in resp.data['results']], ['Acme'])
+
+    def test_other_businesss_dealer_is_404_not_403(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.get(f'{self.LIST}{self.d_b.pk}/').status_code, 404)
+        resp = self.client.patch(f'{self.LIST}{self.d_b.pk}/', {'name': 'x'}, format='json')
+        self.assertEqual(resp.status_code, 404)
+        self.d_b.refresh_from_db()
+        self.assertEqual(self.d_b.name, 'Globex')
+
+    # --- create stamp (perform_create) ---
+    def test_create_stamps_business_from_token_ignoring_body(self):
+        as_user(self.client, self.a)
+        resp = self.client.post(
+            self.LIST, {'name': 'Initech', 'business': self.biz_b.pk}, format='json'
+        )
+        self.assertEqual(resp.status_code, 201, resp.data)
+        self.assertEqual(Dealer.objects.get(name='Initech').business, self.biz_a)
+
+    # --- http_method_names (base) ---
+    def test_put_and_delete_are_405(self):
+        as_user(self.client, self.a)
+        self.assertEqual(
+            self.client.put(f'{self.LIST}{self.d_a.pk}/', {'name': 'x'}, format='json').status_code,
+            405,
+        )
+        self.assertEqual(self.client.delete(f'{self.LIST}{self.d_a.pk}/').status_code, 405)
+
+    # --- validate_name (serializer + context) ---
+    def test_duplicate_name_rejected_per_business(self):
+        as_user(self.client, self.a)
+        self.assertEqual(
+            self.client.post(self.LIST, {'name': 'Acme'}, format='json').status_code, 400
+        )
+        as_user(self.client, self.b)  # same name, different business -- fine
+        self.assertEqual(
+            self.client.post(self.LIST, {'name': 'Acme'}, format='json').status_code, 201
+        )
+
+    # --- filters run inside the scope ---
+    def test_search_and_is_active_stay_scoped(self):
+        Dealer.objects.create(name='Acme Retired', business=self.biz_a, is_active=False)
+        Dealer.objects.create(name='Acme B-side', business=self.biz_b)
+        as_user(self.client, self.a)
+        got = sorted(r['name'] for r in self.client.get(self.LIST, {'search': 'acme'}).data['results'])
+        self.assertEqual(got, ['Acme', 'Acme Retired'])
+        got = [r['name'] for r in self.client.get(self.LIST, {'is_active': 'true'}).data['results']]
+        self.assertEqual(got, ['Acme'])
+
+    # --- permission pair (IsAuthenticated + HasBusiness) ---
+    def test_no_token_is_401(self):
+        self.assertEqual(self.client.get(self.LIST).status_code, 401)
+
+    def test_user_without_business_is_403(self):
+        as_user(self.client, User.objects.create_user('loner', 'loner@example.com', 'pw'))
+        self.assertEqual(self.client.get(self.LIST).status_code, 403)
