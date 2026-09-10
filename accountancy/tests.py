@@ -1,15 +1,18 @@
 import re
+import shutil
+import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accountancy.models import Business, Dealer, OTPCode, Task
+from accountancy.models import Bill, Business, Dealer, OTPCode, Payment, Task
 
 User = get_user_model()
 
@@ -159,6 +162,10 @@ def as_user(client, user):
     client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
 
 
+def a_pdf(name='bill.pdf', size=32):
+    return SimpleUploadedFile(name, b'%PDF-1.4\n' + b'0' * size, content_type='application/pdf')
+
+
 class DealerAPITests(TestCase):
     LIST = '/api/dealers/'
 
@@ -299,3 +306,208 @@ class TaskAPITests(TestCase):
         resp = self.client.post(self.LIST, {'title': 'New', 'business': self.biz_b.pk}, format='json')
         self.assertEqual(resp.status_code, 201, resp.data)
         self.assertEqual(Task.objects.get(title='New').business, self.biz_a)
+
+
+_BILL_MEDIA = tempfile.mkdtemp()
+
+
+@override_settings(MEDIA_ROOT=_BILL_MEDIA)
+class BillAPITests(TestCase):
+    """Bill-specific behaviour: cross-tenant dealer, file validation, the file endpoint."""
+
+    LIST = '/api/bills/'
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(_BILL_MEDIA, ignore_errors=True)
+        super().tearDownClass()
+
+    def setUp(self):
+        self.a = User.objects.create_user('ba', 'ba@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('bb', 'bb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.dealer_a = Dealer.objects.create(name='Acme', business=self.biz_a)
+        self.dealer_b = Dealer.objects.create(name='Globex', business=self.biz_b)
+        self.client = APIClient()
+        as_user(self.client, self.a)
+
+    def create_bill(self, **over):
+        data = {'image': a_pdf(), 'date': '2026-02-01',
+                'dealer': self.dealer_a.pk, 'amount': '150.00'}
+        data.update(over)
+        return self.client.post(self.LIST, data, format='multipart')
+
+    # --- validate_dealer: cross-tenant FK rejected (first real use of context["business"]) ---
+    def test_dealer_from_another_business_rejected(self):
+        resp = self.create_bill(dealer=self.dealer_b.pk)
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('dealer', resp.data)
+
+    # --- validate_image ---
+    def test_non_pdf_rejected(self):
+        png = SimpleUploadedFile('x.png', b'\x89PNG\r\n', content_type='image/png')
+        resp = self.create_bill(image=png)
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('image', resp.data)
+
+    @override_settings(MAX_BILL_UPLOAD_BYTES=64)
+    def test_oversize_pdf_rejected(self):
+        resp = self.create_bill(image=a_pdf(size=500))
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('image', resp.data)
+
+    # --- happy create: business stamped, raw path never exposed ---
+    def test_create_stamps_business_and_hides_raw_path(self):
+        resp = self.create_bill()
+        self.assertEqual(resp.status_code, 201, resp.data)
+        self.assertEqual(Bill.objects.get().business, self.biz_a)
+        self.assertNotIn('image', resp.data)                       # write-only
+        self.assertIn('/api/bills/', resp.data['file_url'])         # the endpoint...
+        self.assertNotIn('/bill_imgs/', resp.data['file_url'])      # ...not the media path
+
+    # --- the file endpoint ---
+    def test_file_endpoint_inline_and_attachment(self):
+        bill_id = self.create_bill().data['id']
+        resp = self.client.get(f'{self.LIST}{bill_id}/file/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp['Content-Type'], 'application/pdf')
+        self.assertTrue(resp['Content-Disposition'].startswith('inline'))
+        resp = self.client.get(f'{self.LIST}{bill_id}/file/?download=1')
+        self.assertTrue(resp['Content-Disposition'].startswith('attachment'))
+
+    def test_file_endpoint_is_tenant_scoped(self):
+        other = Bill.objects.create(image=a_pdf(), date='2026-01-01',
+                                    dealer=self.dealer_b, business=self.biz_b, amount=1)
+        self.assertEqual(self.client.get(f'{self.LIST}{other.pk}/file/').status_code, 404)
+
+    # --- method gating + filters ---
+    def test_delete_is_405(self):
+        bill_id = self.create_bill().data['id']
+        self.assertEqual(self.client.delete(f'{self.LIST}{bill_id}/').status_code, 405)
+
+    def test_list_scoped_and_filtered(self):
+        self.create_bill(date='2026-02-10')
+        self.create_bill(date='2026-03-15')
+        Bill.objects.create(image=a_pdf(), date='2026-02-11',
+                            dealer=self.dealer_b, business=self.biz_b, amount=1)
+        self.assertEqual(self.client.get(self.LIST).data['count'], 2)                     # B's excluded
+        self.assertEqual(self.client.get(self.LIST, {'date_from': '2026-03-01'}).data['count'], 1)
+        self.assertEqual(self.client.get(self.LIST, {'dealer': self.dealer_a.pk}).data['count'], 2)
+
+
+class PaymentAPITests(TestCase):
+    """Payment-specific: the method enum, the /methods/ endpoint, the DB constraint."""
+
+    LIST = '/api/payments/'
+
+    def setUp(self):
+        self.a = User.objects.create_user('pa', 'pa@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('pb', 'pb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.dealer_a = Dealer.objects.create(name='Acme', business=self.biz_a)
+        self.dealer_b = Dealer.objects.create(name='Globex', business=self.biz_b)
+        self.client = APIClient()
+        as_user(self.client, self.a)
+
+    def create_payment(self, **over):
+        data = {'dealer': self.dealer_a.pk, 'date': '2026-02-01',
+                'amount': '500.00', 'method': 'upi'}
+        data.update(over)
+        return self.client.post(self.LIST, data, format='json')
+
+    # --- the method enum ---
+    def test_invalid_method_rejected(self):
+        resp = self.create_payment(method='banana')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('method', resp.data)
+
+    def test_valid_method_accepted(self):
+        self.assertEqual(self.create_payment(method='cheque').status_code, 201)
+
+    def test_methods_endpoint_lists_the_enum(self):
+        resp = self.client.get(f'{self.LIST}methods/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            {row['value'] for row in resp.data},
+            {'cash', 'upi', 'card', 'cheque', 'bank_transfer'},
+        )
+        self.assertIn('label', resp.data[0])
+
+    def test_filter_by_method(self):
+        self.create_payment(method='cash')
+        self.create_payment(method='cash')
+        self.create_payment(method='upi')
+        self.assertEqual(self.client.get(self.LIST, {'method': 'cash'}).data['count'], 2)
+
+    # --- DB constraint: enforced even bypassing the serializer ---
+    def test_db_rejects_bad_method(self):
+        from django.db import IntegrityError, transaction
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Payment.objects.create(dealer=self.dealer_a, business=self.biz_a,
+                                   date='2026-01-01', amount=1, method='banana')
+
+    # --- shared DealerScopedMixin still applies to Payment ---
+    def test_dealer_from_another_business_rejected(self):
+        resp = self.create_payment(dealer=self.dealer_b.pk)
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('dealer', resp.data)
+
+    # --- method gating + base ---
+    def test_delete_is_405_and_create_stamps_business(self):
+        pid = self.create_payment().data['id']
+        self.assertEqual(self.client.delete(f'{self.LIST}{pid}/').status_code, 405)
+        self.assertEqual(Payment.objects.get(pk=pid).business, self.biz_a)
+
+
+class BusinessAPITests(TestCase):
+    """The singleton -- no {id}, GET/PATCH only, plus the nested copy in /api/auth/user/."""
+
+    URL = '/api/business/'
+    USER_URL = '/api/auth/user/'
+
+    def setUp(self):
+        self.a = User.objects.create_user('bza', 'bza@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('bzb', 'bzb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.client = APIClient()
+
+    def test_get_returns_own_business_without_owner(self):
+        as_user(self.client, self.a)
+        resp = self.client.get(self.URL)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['name'], 'A Traders')
+        self.assertEqual(resp.data['id'], self.biz_a.id)
+        self.assertNotIn('owner', resp.data)
+
+    def test_patch_renames(self):
+        as_user(self.client, self.a)
+        resp = self.client.patch(self.URL, {'name': 'A Wholesale'}, format='json')
+        self.assertEqual(resp.status_code, 200)
+        self.biz_a.refresh_from_db()
+        self.assertEqual(self.biz_a.name, 'A Wholesale')
+
+    def test_put_is_405(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.put(self.URL, {'name': 'x'}, format='json').status_code, 405)
+
+    def test_no_id_route(self):
+        as_user(self.client, self.a)
+        self.assertEqual(self.client.get(f'{self.URL}{self.biz_b.id}/').status_code, 404)
+
+    def test_each_user_sees_only_their_own(self):
+        as_user(self.client, self.b)
+        self.assertEqual(self.client.get(self.URL).data['name'], 'B Traders')
+
+    def test_user_endpoint_nests_business(self):
+        as_user(self.client, self.a)
+        resp = self.client.get(self.USER_URL)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.data['business'], {'id': self.biz_a.id, 'name': 'A Traders'})
+
+    def test_no_token_401_and_businessless_403(self):
+        self.assertEqual(self.client.get(self.URL).status_code, 401)
+        as_user(self.client, User.objects.create_user('bzl', 'bzl@example.com', 'pw'))
+        self.assertEqual(self.client.get(self.URL).status_code, 403)

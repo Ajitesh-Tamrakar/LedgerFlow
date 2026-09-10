@@ -153,6 +153,7 @@ REST_AUTH = {
     'USE_JWT': True,
     'SESSION_LOGIN': False,
     'REGISTER_SERIALIZER': 'accountancy.serializers.CustomRegisterSerializer',
+    'USER_DETAILS_SERIALIZER': 'accountancy.serializers.CustomUserDetailsSerializer',  # nests `business`
     'TOKEN_MODEL': None,  # JWT-only; not using DRF's legacy authtoken model
     'JWT_AUTH_HTTPONLY': False,  # tokens in the response body, not cookies (needed for logout to read `refresh` from request data)
 }

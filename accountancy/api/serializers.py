@@ -1,6 +1,18 @@
+from django.conf import settings
+from django.urls import reverse
 from rest_framework import serializers
 
-from accountancy.models import Dealer, Task
+from accountancy.models import Bill, Business, Dealer, Payment, Task
+
+
+class DealerScopedMixin:
+    """For serializers with a `dealer` FK -- reject another tenant's dealer,
+    with a message that doesn't confirm it exists elsewhere."""
+
+    def validate_dealer(self, value):
+        if value.business_id != self.context["business"].id:
+            raise serializers.ValidationError("No such dealer.")
+        return value
 
 
 class DealerSerializer(serializers.ModelSerializer):
@@ -32,3 +44,40 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ["id", "title", "is_done", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+
+class BillSerializer(DealerScopedMixin, serializers.ModelSerializer):
+    image = serializers.FileField(write_only=True)      # upload only -- never echoed back
+    file_url = serializers.SerializerMethodField()      # the only way to read the PDF
+
+    class Meta:
+        model = Bill
+        fields = ["id", "image", "file_url", "date", "dealer", "amount",
+                  "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_file_url(self, obj):
+        request = self.context["request"]
+        return request.build_absolute_uri(reverse("bill-file", kwargs={"pk": obj.pk}))
+
+    def validate_image(self, value):
+        max_bytes = getattr(settings, "MAX_BILL_UPLOAD_BYTES", 10 * 1024 * 1024)
+        if getattr(value, "content_type", None) != "application/pdf":
+            raise serializers.ValidationError("The bill file must be a PDF.")
+        if value.size > max_bytes:
+            raise serializers.ValidationError("The PDF is too large.")
+        return value
+
+
+class PaymentSerializer(DealerScopedMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["id", "dealer", "date", "amount", "method", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class BusinessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Business
+        fields = ["id", "name", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]

@@ -1,5 +1,6 @@
 from allauth.account.models import EmailAddress
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -8,6 +9,21 @@ from accountancy import otp
 from accountancy.models import Business, OTPCode
 
 User = get_user_model()
+
+
+class CustomUserDetailsSerializer(UserDetailsSerializer):
+    """GET /api/auth/user/ -- dj-rest-auth's user payload plus a read-only copy
+    of the caller's business, so the app's post-login bootstrap is one call.
+    Renaming still goes through PATCH /api/business/."""
+
+    business = serializers.SerializerMethodField()
+
+    class Meta(UserDetailsSerializer.Meta):
+        fields = UserDetailsSerializer.Meta.fields + ('business',)
+
+    def get_business(self, obj):
+        biz = getattr(obj, 'business', None)
+        return {'id': biz.id, 'name': biz.name} if biz else None
 
 
 class CustomRegisterSerializer(RegisterSerializer):

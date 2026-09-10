@@ -58,6 +58,13 @@ class Bill(models.Model):
 
 
 class Payment(models.Model):
+    class Method(models.TextChoices):
+        CASH = 'cash', 'Cash'
+        UPI = 'upi', 'UPI'
+        CARD = 'card', 'Card'
+        CHEQUE = 'cheque', 'Cheque'
+        BANK_TRANSFER = 'bank_transfer', 'Bank transfer'
+
     dealer = models.ForeignKey(Dealer, on_delete=models.PROTECT)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     date = models.DateField()
@@ -65,7 +72,7 @@ class Payment(models.Model):
         max_digits=10, decimal_places=2, default=Decimal('0.00'),
         validators=[MinValueValidator(Decimal('0.00'))],
     )
-    method = models.CharField(max_length=50)
+    method = models.CharField(max_length=20, choices=Method.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     history = HistoricalRecords()
@@ -74,6 +81,11 @@ class Payment(models.Model):
         indexes = [models.Index(fields=['business', 'dealer', 'date'])]
         constraints = [
             models.CheckConstraint(check=Q(amount__gte=0), name='payment_amount_gte_0'),
+            # keep the value list in sync with Method above -- Meta can't see the nested class
+            models.CheckConstraint(
+                check=Q(method__in=['cash', 'upi', 'card', 'cheque', 'bank_transfer']),
+                name='payment_method_valid',
+            ),
         ]
 
 

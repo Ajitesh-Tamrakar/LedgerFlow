@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from accountancy.models import Dealer
+from accountancy.models import Bill, Dealer, Payment
 
 
 class DealerFilter(django_filters.FilterSet):
@@ -15,3 +15,21 @@ class DealerFilter(django_filters.FilterSet):
         return queryset.filter(
             Q(name__icontains=value) | Q(gstin__icontains=value)
         )
+
+
+class BillFilter(django_filters.FilterSet):
+    date_from = django_filters.DateFilter(field_name="date", lookup_expr="gte")
+    date_to = django_filters.DateFilter(field_name="date", lookup_expr="lte")
+
+    class Meta:
+        model = Bill
+        fields = ["dealer"]        # auto -> ?dealer=<id> exact match
+
+
+class PaymentFilter(django_filters.FilterSet):
+    date_from = django_filters.DateFilter(field_name="date", lookup_expr="gte")
+    date_to = django_filters.DateFilter(field_name="date", lookup_expr="lte")
+
+    class Meta:
+        model = Payment
+        fields = ["dealer", "method"]      # ?dealer=<id>, ?method=upi (ChoiceFilter from the enum)
