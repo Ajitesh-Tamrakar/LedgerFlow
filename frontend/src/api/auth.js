@@ -7,9 +7,12 @@ import { request } from './client'
  * because ACCOUNT_EMAIL_VERIFICATION is 'mandatory'. The caller's next step is
  * the verification screen, never the app.
  *
- * Known gap: the server only rejects an email that is already *verified*, so
- * registering twice with the same unverified address succeeds twice and
- * creates two accounts. There is no "email taken" error to handle yet.
+ * Registering an address that already has an unverified account also returns
+ * 201, and deliberately so: it quietly reuses that account and re-sends a code
+ * rather than creating a second one. The response is identical to an original
+ * signup, so this screen has no "email taken" state to render and must not
+ * invent one. An address that is already *verified* is a different matter and
+ * does come back as a 400 on the email field.
  */
 export function register(values) {
   return request('/auth/registration/', { method: 'POST', body: values, anonymous: true })

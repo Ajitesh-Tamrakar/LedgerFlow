@@ -12,6 +12,9 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from allauth.account.models import EmailAddress
+
+from accountancy import otp
 from accountancy.models import Bill, Business, Cashbook, Dealer, OTPCode, Payment, Task
 
 User = get_user_model()
@@ -155,6 +158,112 @@ class AuthFlowTests(TestCase):
         resp = client.post(RESET_REQUEST_URL, {'email': 'nobody@example.com'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
         self.assertEqual(len(mail.outbox), 0)
+
+
+class DuplicateRegistrationTests(TestCase):
+    """Registering an address that already has an unverified account.
+
+    dj-rest-auth's RegisterSerializer only rejects an address that is already
+    *verified*, and never consults allauth's own `assess_unique_email` policy.
+    That let a second account be created for a pending address, after which
+    neither could ever be verified: allauth's partial unique index allows one
+    verified row per address, and the old verify step tried to flip every
+    matching row at once, so the write failed with an IntegrityError forever.
+    """
+
+    def setUp(self):
+        cache.clear()
+
+    def register(self, client, email, password, business):
+        return client.post(
+            REGISTER_URL,
+            {'email': email, 'password1': password, 'password2': password,
+             'business_name': business},
+            format='json',
+        )
+
+    def test_repeat_signup_creates_no_second_account(self):
+        client = APIClient()
+        email = 'pending@example.com'
+
+        first = self.register(client, email, 'S3cur3Pass!123', 'First Shop')
+        second = self.register(client, email, 'Different!Pass8', 'Second Shop')
+
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED, first.data)
+        # Same response as an original signup: the caller cannot tell the
+        # address was taken, so the endpoint reveals nothing.
+        self.assertEqual(second.status_code, status.HTTP_201_CREATED, second.data)
+
+        self.assertEqual(User.objects.filter(email__iexact=email).count(), 1)
+        self.assertEqual(EmailAddress.objects.filter(email__iexact=email).count(), 1)
+        self.assertEqual(Business.objects.filter(name__in=['First Shop', 'Second Shop']).count(), 1)
+
+    def test_repeat_signup_leaves_the_original_account_untouched(self):
+        client = APIClient()
+        email, original = 'pending@example.com', 'S3cur3Pass!123'
+
+        self.register(client, email, original, 'First Shop')
+        self.register(client, email, 'Different!Pass8', 'Second Shop')
+
+        user = User.objects.get(email__iexact=email)
+        self.assertTrue(user.check_password(original))
+        self.assertFalse(user.check_password('Different!Pass8'))
+        self.assertEqual(user.business.name, 'First Shop')
+
+    def test_address_is_still_verifiable_after_a_repeat_signup(self):
+        """The regression. This sequence used to raise IntegrityError."""
+        client = APIClient()
+        email, password = 'pending@example.com', 'S3cur3Pass!123'
+
+        self.register(client, email, password, 'First Shop')
+        self.register(client, email, 'Different!Pass8', 'Second Shop')
+
+        # The resend path issues a fresh code regardless of how many signups ran.
+        client.post(RESEND_URL, {'email': email}, format='json')
+        resp = client.post(VERIFY_CODE_URL, {'email': email, 'code': last_code()}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
+
+        resp = client.post(LOGIN_URL, {'email': email, 'password': password}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
+        self.assertEqual(resp.data['user']['business']['name'], 'First Shop')
+
+    def test_verified_address_is_still_rejected_outright(self):
+        client = APIClient()
+        email, password = 'done@example.com', 'S3cur3Pass!123'
+
+        self.register(client, email, password, 'First Shop')
+        client.post(VERIFY_CODE_URL, {'email': email, 'code': last_code()}, format='json')
+
+        resp = self.register(client, email, password, 'Second Shop')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST, resp.data)
+        self.assertIn('email', resp.data)
+
+    def test_legacy_duplicates_refuse_instead_of_crashing(self):
+        """Rows that predate the registration fix still exist in real databases.
+
+        Verification must pick one and decline the other, not raise. Built
+        directly rather than through the API, because the API can no longer
+        produce this state.
+        """
+        email = 'legacy@example.com'
+        for n, name in enumerate(['First Shop', 'Second Shop'], start=1):
+            user = User.objects.create_user(
+                username=f'legacy{n}', email=email, password='S3cur3Pass!123',
+            )
+            Business.objects.create(name=name, owner=user)
+            EmailAddress.objects.create(user=user, email=email, verified=False, primary=True)
+
+        client = APIClient()
+        code = otp.issue(email, OTPCode.PURPOSE_VERIFY_EMAIL)
+        resp = client.post(VERIFY_CODE_URL, {'email': email, 'code': code}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
+
+        verified = EmailAddress.objects.filter(email__iexact=email, verified=True)
+        self.assertEqual(verified.count(), 1)
+
+        # The loser is refused with a message rather than an IntegrityError.
+        second = EmailAddress.objects.filter(email__iexact=email, verified=False).get()
+        self.assertFalse(second.set_verified())
 
 
 def as_user(client, user):
