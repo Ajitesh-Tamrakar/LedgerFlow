@@ -1,0 +1,328 @@
+:root {
+  --paper: #fafbf7;
+  --surface: #ffffff;
+  --ink: #17201a;
+  --ink-muted: #55625a;
+  --rule: #d2dacd;
+  --accent: #1e5b3c;
+  --accent-ink: #ffffff;
+  --danger: #9a2f23;
+  --danger-bg: #fdf1ef;
+
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.auth {
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+}
+
+.auth__head {
+  margin-bottom: 2rem;
+}
+
+.auth__head h1 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+.auth__head p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+}
+
+.auth__foot {
+  margin-top: 1.75rem;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.auth__foot a {
+  color: var(--accent);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.field__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.field input {
+  font: inherit;
+  color: inherit;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.field input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.field__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.button {
+  font: inherit;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  padding: 0.6rem 1rem;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.alert {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border: 1px solid currentColor;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.alert p {
+  margin: 0;
+}
+
+.alert p + p {
+  margin-top: 0.4rem;
+}
+
+.alert--quiet {
+  color: var(--ink-muted);
+  background: var(--surface);
+  border-color: var(--rule);
+}
+
+/* Six digits, spaced out so a typo is easy to spot before submitting. */
+.field input.field__code {
+  max-width: 9rem;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.35em;
+  text-align: center;
+}
+
+.auth__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.auth__aside p {
+  margin: 0;
+}
+
+.auth__aside a {
+  color: var(--accent);
+}
+
+.button--quiet {
+  color: var(--accent);
+  background: transparent;
+  border-color: var(--rule);
+}
+
+.button--quiet:disabled {
+  color: var(--ink-muted);
+}
+
+.alert--good {
+  color: #1e5b3c;
+  background: #eef5f0;
+  border-color: currentColor;
+}
+
+/* The reset really is a sequence, so the step label carries information
+   rather than decorating the heading. */
+.auth__step {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* A control that changes what is on screen without navigating, so it is a
+   button, styled to sit quietly among the links around it. */
+.linkish {
+  font: inherit;
+  padding: 0;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkish:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- app shell ----------------------------------------------------------- */
+
+.shell {
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+.shell__bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+
+.shell__identity {
+  min-width: 0;
+}
+
+.shell__business {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.shell__account {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.shell__bar .button {
+  margin-top: 0;
+  margin-left: auto;
+  flex: none;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+/* Scrolls sideways on a narrow screen instead of wrapping into a tall block
+   that pushes the page content off the first screen. */
+.shell__nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 0.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  overflow-x: auto;
+}
+
+.shell__link {
+  flex: none;
+  padding: 0.6rem 0.75rem;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.shell__link:hover {
+  color: var(--ink);
+}
+
+.shell__link--on {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.shell__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.shell__body {
+  padding: 1.75rem 1.25rem 4rem;
+}
+
+/* --- a page inside the shell --------------------------------------------- */
+
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.page h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.page__lede {
+  margin: 0 0 1.5rem;
+  color: var(--ink-muted);
+}
+
+.page a {
+  color: var(--accent);
+}
