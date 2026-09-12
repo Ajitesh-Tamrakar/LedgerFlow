@@ -1,0 +1,318 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   LedgerFlow design tokens.
+
+   Everything the interface is allowed to use lives here. Utilities compile to
+   var(--color-*), so redefining those variables under a selector flips the
+   whole app -- that is the entire dark mode implementation, further down.
+
+   Plain @theme, never @theme inline: the inline form substitutes the literal
+   hex into every utility, which would bake the light value in and break the
+   swap.
+   =========================================================================== */
+
+@theme {
+  /* ground and surfaces */
+  --color-paper:     #F0F1ED;
+  --color-surface:   #FFFFFF;
+  --color-sunken:    #F7F8F5;
+
+  /* ink. The neutrals are nearly neutral: red equals blue, green sits two
+     points higher, so they read warm rather than green. */
+  --color-ink:       #121812;
+  --color-ink-2:     #525E54;
+  --color-ink-3:     #626D64;
+
+  /* edges. `rule` is decorative and exempt from the 3:1 floor; `control` is
+     an interactive boundary and clears it. */
+  --color-rule:      #DDE2D8;
+  --color-rule-soft: #E9ECE4;
+  --color-control:   #8A948C;
+
+  /* brand, which is also the "settled / money in" data colour */
+  --color-brand:      #1E5B3C;
+  --color-brand-soft: #E2EFE7;
+
+  /* data: due soon */
+  --color-amber:      #8A5A0B;
+  --color-amber-soft: #F8EEDC;
+
+  /* data: overdue / money out */
+  --color-clay:       #9B3225;
+  --color-clay-soft:  #FAECE8;
+
+  /* the action colour is ink, so a label sitting on it is the paper */
+  --color-on-action:  #FFFFFF;
+
+  --font-display: "Inter Tight", "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-control: 8px;
+  --radius-inner:   12px;
+  --radius-tile:    20px;
+
+  --shadow-raised: 0 1px 2px rgb(18 24 18 / .06), 0 10px 28px -14px rgb(18 24 18 / .16);
+  --shadow-float:  0 4px 10px rgb(18 24 18 / .08), 0 24px 48px -20px rgb(18 24 18 / .28);
+
+  --ease-enter: cubic-bezier(.2, 0, 0, 1);
+  --ease-exit:  cubic-bezier(.4, 0, 1, 1);
+  --ease-move:  cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   The swap. Same names, different values, no second stylesheet.
+
+   This block appears twice, verbatim. Once for the viewer who has never
+   touched a toggle and whose OS is dark, and once for the viewer who chose
+   dark explicitly. CSS cannot share one body between a media query and a
+   plain selector, so it is copied rather than shared.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper:      #0E0F0E;
+    --color-surface:    #161816;
+    --color-sunken:     #1D1F1D;
+    --color-ink:        #EAECE9;
+    --color-ink-2:      #A2A7A2;
+    --color-ink-3:      #848A85;
+    --color-rule:       #2B2E2B;
+    --color-rule-soft:  #232622;
+    --color-control:    #646A65;
+    --color-brand:      #6FC796;
+    --color-brand-soft: #16281D;
+    --color-amber:      #D9A45C;
+    --color-amber-soft: #2A2317;
+    --color-clay:       #E08B7A;
+    --color-clay-soft:  #2C1C18;
+    --color-on-action:  #0E0F0E;
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / .5), 0 10px 28px -14px rgb(0 0 0 / .7);
+    --shadow-float:  0 4px 10px rgb(0 0 0 / .5), 0 24px 48px -20px rgb(0 0 0 / .8);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-paper:      #0E0F0E;
+  --color-surface:    #161816;
+  --color-sunken:     #1D1F1D;
+  --color-ink:        #EAECE9;
+  --color-ink-2:      #A2A7A2;
+  --color-ink-3:      #848A85;
+  --color-rule:       #2B2E2B;
+  --color-rule-soft:  #232622;
+  --color-control:    #646A65;
+  --color-brand:      #6FC796;
+  --color-brand-soft: #16281D;
+  --color-amber:      #D9A45C;
+  --color-amber-soft: #2A2317;
+  --color-clay:       #E08B7A;
+  --color-clay-soft:  #2C1C18;
+  --color-on-action:  #0E0F0E;
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / .5), 0 10px 28px -14px rgb(0 0 0 / .7);
+  --shadow-float:  0 4px 10px rgb(0 0 0 / .5), 0 24px 48px -20px rgb(0 0 0 / .8);
+}
+
+@layer base {
+  /* One height for every control. A button, a field and a filter chip on the
+     same row line up because they all read this. Not in @theme, because
+     Tailwind has no height namespace to hang it on. */
+  :root {
+    --control-h: 38px;
+    color-scheme: light dark;
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"]  { color-scheme: dark; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Focus is always the brand ring, on every focusable thing, so it never has
+     to be re-specified per component. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  /* Nothing is disabled outright under reduced motion; it is quietened. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* --- the control box -----------------------------------------------------
+     Inputs, selects and date triggers are the same box. Only what sits inside
+     them differs, so the box is defined once. */
+  .control {
+    width: 100%;
+    height: var(--control-h);
+    padding: 0 0.75rem;
+    font-size: 14px;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-control);
+    border-radius: var(--radius-control);
+    transition: border-color 120ms var(--ease-move), box-shadow 120ms var(--ease-move);
+  }
+  .control::placeholder { color: var(--color-ink-3); }
+  .control:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 22%, transparent);
+  }
+  .control[aria-invalid="true"] { border-color: var(--color-clay); }
+  .control[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-clay) 20%, transparent);
+  }
+
+  /* Six digits, spaced out so a typo is easy to spot before submitting. */
+  .control-code {
+    max-width: 11rem;
+    height: 52px;
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .4em;
+    text-indent: .4em;      /* the tracking is trailing, so re-centre it */
+    text-align: center;
+  }
+
+  /* --- buttons -------------------------------------------------------------
+     The action colour is ink, never the brand green. That keeps green free to
+     mean "settled" in the data. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: var(--control-h);
+    padding: 0 1rem;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+    transition: opacity 120ms var(--ease-move), background 120ms var(--ease-move),
+                border-color 120ms var(--ease-move), transform 120ms var(--ease-move);
+  }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--color-ink);
+    color: var(--color-on-action);
+    border-color: var(--color-ink);
+  }
+  .btn-primary:hover:not(:disabled) { opacity: .88; }
+
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border-color: var(--color-control);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-sunken);
+    border-color: var(--color-ink-3);
+  }
+
+  .btn-quiet {
+    background: transparent;
+    color: var(--color-ink-2);
+  }
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--color-sunken);
+    color: var(--color-ink);
+  }
+
+  /* --- status --------------------------------------------------------------
+     A pill always carries the word, never colour alone. Print it in greyscale
+     and nothing is lost. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+  .pill::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .pill-settled { background: var(--color-brand-soft); color: var(--color-brand); }
+  .pill-due     { background: var(--color-amber-soft); color: var(--color-amber); }
+  .pill-overdue { background: var(--color-clay-soft);  color: var(--color-clay); }
+
+  /* --- surfaces ------------------------------------------------------------
+     A border means same plane, a shadow means above it. Tiles get both,
+     because the bento wants a little lift off the tinted ground. */
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-inner);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule-soft);
+    border-radius: var(--radius-inner);
+  }
+
+  /* --- type roles ----------------------------------------------------------
+     Inter Tight only ever appears at 20px and up. Below that it is a display
+     cut doing nothing but costing legibility. */
+  .t-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+
+  .t-amount {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .t-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -.025em;
+    line-height: 1.2;
+  }
+
+  .t-hero {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 34px;
+    letter-spacing: -.03em;
+    line-height: 1.05;
+  }
+}

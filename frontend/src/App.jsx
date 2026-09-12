@@ -34,7 +34,7 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route path="*" element={<Placeholder title="Page not found" />} />
+      <Route path="*" element={<Placeholder title="Page not found" standalone />} />
     </Routes>
   )
 }

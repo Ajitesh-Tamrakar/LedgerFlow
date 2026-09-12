@@ -3,6 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { confirmPasswordReset, requestPasswordReset } from '../api/auth'
 import { readErrors } from '../api/client'
+import Alert from '../components/Alert'
+import AuthLayout from '../components/AuthLayout'
+import Button from '../components/Button'
 import Field from '../components/Field'
 
 const CODE_LENGTH = 6
@@ -129,127 +132,64 @@ export default function ForgotPassword() {
   }
 
   const banner = formErrors.length > 0 && (
-    <div className="alert" role="alert">
+    <Alert>
       {formErrors.map((message) => (
         <p key={message}>{message}</p>
       ))}
-    </div>
+    </Alert>
   )
 
   if (step === ASK) {
     return (
-      <main className="auth">
-        <header className="auth__head">
-          <p className="auth__step">Step 1 of 2</p>
-          <h1>Reset your password</h1>
-          <p>
-            Tell us the address on your account and we will send a {CODE_LENGTH}-digit code.
-          </p>
-        </header>
+      <AuthLayout
+        step="Step 1 of 2"
+        title="Reset your password"
+        lede={`Tell us the address on your account and we will send a ${CODE_LENGTH}-digit code.`}
+        footer={
+          <>
+            Remembered it?{' '}
+            <Link to="/login" className="font-semibold text-brand">
+              Sign in
+            </Link>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {banner}
 
-        {banner}
+          <form onSubmit={handleAsk} noValidate className="flex flex-col gap-4">
+            <Field
+              name="email"
+              label="Email address"
+              type="email"
+              value={email}
+              error={fieldErrors.email}
+              onChange={(event) => {
+                setEmail(event.target.value)
+                clearErrors()
+              }}
+              autoComplete="email"
+              autoFocus
+            />
 
-        <form onSubmit={handleAsk} noValidate>
-          <Field
-            name="email"
-            label="Email address"
-            type="email"
-            value={email}
-            error={fieldErrors.email}
-            onChange={(event) => {
-              setEmail(event.target.value)
-              clearErrors()
-            }}
-            autoComplete="email"
-            autoFocus
-          />
-
-          <button type="submit" className="button" disabled={pending}>
-            {pending ? 'Sending…' : 'Send code'}
-          </button>
-        </form>
-
-        <p className="auth__foot">
-          Remembered it? <Link to="/login">Sign in</Link>
-        </p>
-      </main>
+            <Button type="submit" busy={pending} className="mt-1 w-full">
+              {pending ? 'Sending…' : 'Send code'}
+            </Button>
+          </form>
+        </div>
+      </AuthLayout>
     )
   }
 
   return (
-    <main className="auth">
-      <header className="auth__head">
-        <p className="auth__step">Step 2 of 2</p>
-        <h1>Choose a new password</h1>
-        <p>Enter the code sent to {email}. It expires in 10 minutes.</p>
-      </header>
-
-      {banner}
-
-      <form onSubmit={handleReset} noValidate>
-        <Field
-          name="code"
-          label="Reset code"
-          className="field__code"
-          value={code}
-          error={fieldErrors.code}
-          onChange={(event) => {
-            setCode(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH))
-            clearErrors()
-          }}
-          inputMode="numeric"
-          maxLength={CODE_LENGTH}
-          autoComplete="one-time-code"
-          autoFocus
-        />
-
-        <Field
-          name="new_password1"
-          label="New password"
-          type="password"
-          value={password1}
-          error={fieldErrors.new_password1}
-          onChange={(event) => {
-            setPassword1(event.target.value)
-            clearErrors()
-          }}
-          autoComplete="new-password"
-        />
-
-        <Field
-          name="new_password2"
-          label="Confirm new password"
-          type="password"
-          value={password2}
-          error={fieldErrors.new_password2}
-          onChange={(event) => {
-            setPassword2(event.target.value)
-            clearErrors()
-          }}
-          autoComplete="new-password"
-        />
-
-        <button type="submit" className="button" disabled={pending}>
-          {pending ? 'Updating…' : 'Update password'}
-        </button>
-      </form>
-
-      <div className="auth__aside">
-        <p>Code not arrived, or already used?</p>
+    <AuthLayout
+      step="Step 2 of 2"
+      title="Choose a new password"
+      lede={`Enter the code sent to ${email}. It expires in 10 minutes.`}
+      footer={
         <button
           type="button"
-          className="button button--quiet"
-          onClick={() => sendCode(false)}
-          disabled={pending || cooldown > 0}
-        >
-          {cooldown > 0 ? `Send another in ${cooldown}s` : 'Send another code'}
-        </button>
-      </div>
-
-      <p className="auth__foot">
-        <button
-          type="button"
-          className="linkish"
+          className="font-semibold text-brand underline"
           onClick={() => {
             clearErrors()
             setCode('')
@@ -258,7 +198,71 @@ export default function ForgotPassword() {
         >
           Use a different email address
         </button>
-      </p>
-    </main>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {banner}
+
+        <form onSubmit={handleReset} noValidate className="flex flex-col gap-4">
+          <Field
+            name="code"
+            label="Reset code"
+            className="control-code"
+            value={code}
+            error={fieldErrors.code}
+            onChange={(event) => {
+              setCode(event.target.value.replace(/\D/g, '').slice(0, CODE_LENGTH))
+              clearErrors()
+            }}
+            inputMode="numeric"
+            maxLength={CODE_LENGTH}
+            autoComplete="one-time-code"
+            autoFocus
+          />
+
+          <Field
+            name="new_password1"
+            label="New password"
+            type="password"
+            value={password1}
+            error={fieldErrors.new_password1}
+            onChange={(event) => {
+              setPassword1(event.target.value)
+              clearErrors()
+            }}
+            autoComplete="new-password"
+          />
+
+          <Field
+            name="new_password2"
+            label="Confirm new password"
+            type="password"
+            value={password2}
+            error={fieldErrors.new_password2}
+            onChange={(event) => {
+              setPassword2(event.target.value)
+              clearErrors()
+            }}
+            autoComplete="new-password"
+          />
+
+          <Button type="submit" busy={pending} className="mt-1 w-full">
+            {pending ? 'Updating…' : 'Update password'}
+          </Button>
+        </form>
+
+        <div className="flex flex-col items-start gap-2.5 border-t border-rule pt-4">
+          <p className="text-[13px] text-ink-2">Code not arrived, or already used?</p>
+          <Button
+            variant="secondary"
+            busy={pending}
+            disabled={cooldown > 0}
+            onClick={() => sendCode(false)}
+          >
+            {cooldown > 0 ? `Send another in ${cooldown}s` : 'Send another code'}
+          </Button>
+        </div>
+      </div>
+    </AuthLayout>
   )
 }

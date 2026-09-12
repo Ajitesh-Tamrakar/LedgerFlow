@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { register } from '../api/auth'
 import { readErrors } from '../api/client'
+import Alert from '../components/Alert'
+import AuthLayout from '../components/AuthLayout'
+import Button from '../components/Button'
 import Field from '../components/Field'
 
 // Form state is keyed by the server's own field names rather than camelCase
@@ -83,67 +86,71 @@ export default function Register() {
   }
 
   return (
-    <main className="auth">
-      <header className="auth__head">
-        <h1>Create your ledger</h1>
-        <p>One account, one business. You will confirm your email before signing in.</p>
-      </header>
+    <AuthLayout
+      title="Create your ledger"
+      lede="One account, one business. You will confirm your email before signing in."
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link to="/login" className="font-semibold text-brand">
+            Sign in
+          </Link>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {formErrors.length > 0 && (
+          <Alert>
+            {formErrors.map((message) => (
+              <p key={message}>{message}</p>
+            ))}
+          </Alert>
+        )}
 
-      {formErrors.length > 0 && (
-        <div className="alert" role="alert">
-          {formErrors.map((message) => (
-            <p key={message}>{message}</p>
-          ))}
-        </div>
-      )}
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <Field
+            name="business_name"
+            label="Business name"
+            value={values.business_name}
+            error={fieldErrors.business_name}
+            onChange={update}
+            autoComplete="organization"
+            autoFocus
+          />
+          <Field
+            name="email"
+            label="Email address"
+            type="email"
+            value={values.email}
+            error={fieldErrors.email}
+            onChange={update}
+            autoComplete="email"
+            hint="You sign in with this, and we send your confirmation code to it."
+          />
+          <Field
+            name="password1"
+            label="Password"
+            type="password"
+            value={values.password1}
+            error={fieldErrors.password1}
+            onChange={update}
+            autoComplete="new-password"
+          />
+          <Field
+            name="password2"
+            label="Confirm password"
+            type="password"
+            value={values.password2}
+            error={fieldErrors.password2}
+            onChange={update}
+            autoComplete="new-password"
+          />
 
-      <form onSubmit={handleSubmit} noValidate>
-        <Field
-          name="business_name"
-          label="Business name"
-          value={values.business_name}
-          error={fieldErrors.business_name}
-          onChange={update}
-          autoComplete="organization"
-          autoFocus
-        />
-        <Field
-          name="email"
-          label="Email address"
-          type="email"
-          value={values.email}
-          error={fieldErrors.email}
-          onChange={update}
-          autoComplete="email"
-          hint="You sign in with this, and we send your confirmation code to it."
-        />
-        <Field
-          name="password1"
-          label="Password"
-          type="password"
-          value={values.password1}
-          error={fieldErrors.password1}
-          onChange={update}
-          autoComplete="new-password"
-        />
-        <Field
-          name="password2"
-          label="Confirm password"
-          type="password"
-          value={values.password2}
-          error={fieldErrors.password2}
-          onChange={update}
-          autoComplete="new-password"
-        />
-
-        <button type="submit" className="button" disabled={pending}>
-          {pending ? 'Creating your ledger…' : 'Create account'}
-        </button>
-      </form>
-
-      <p className="auth__foot">
-        Already have an account? <Link to="/login">Sign in</Link>
-      </p>
-    </main>
+          <Button type="submit" busy={pending} className="mt-1 w-full">
+            {pending ? 'Creating your ledger…' : 'Create account'}
+          </Button>
+        </form>
+      </div>
+    </AuthLayout>
   )
 }

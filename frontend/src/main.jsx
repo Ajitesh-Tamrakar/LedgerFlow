@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import { AuthProvider } from './auth/AuthContext'
-import './styles.css'
+import './styles/theme.css'
 
 // AuthProvider sits inside the router because it navigates: an expired session
 // has to be able to send the user to sign in from anywhere in the app.

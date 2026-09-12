@@ -3,6 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { resendVerification, verifyEmail } from '../api/auth'
 import { readErrors } from '../api/client'
+import Alert from '../components/Alert'
+import AuthLayout from '../components/AuthLayout'
+import Button from '../components/Button'
 import Field from '../components/Field'
 
 const CODE_LENGTH = 6
@@ -112,85 +115,85 @@ export default function VerifyEmail() {
   }
 
   return (
-    <main className="auth">
-      <header className="auth__head">
-        <h1>Confirm your email</h1>
-        <p>
-          {handedOver
-            ? `We sent a ${CODE_LENGTH}-digit code to ${handedOver}. It expires in 15 minutes.`
-            : `Enter the ${CODE_LENGTH}-digit code from your confirmation email.`}
-        </p>
-      </header>
-
-      {formErrors.length > 0 && (
-        <div className="alert" role="alert">
-          {formErrors.map((message) => (
-            <p key={message}>{message}</p>
-          ))}
-        </div>
-      )}
-
-      {notice && (
-        <div className="alert alert--quiet" role="status">
-          <p>{notice}</p>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} noValidate>
-        {!handedOver && (
-          <Field
-            name="email"
-            label="Email address"
-            type="email"
-            value={email}
-            error={fieldErrors.email}
-            onChange={(event) => {
-              setEmail(event.target.value)
-              setFieldErrors({})
-            }}
-            autoComplete="email"
-            autoFocus
-          />
+    <AuthLayout
+      title="Confirm your email"
+      lede={
+        handedOver
+          ? `We sent a ${CODE_LENGTH}-digit code to ${handedOver}. It expires in 15 minutes.`
+          : `Enter the ${CODE_LENGTH}-digit code from your confirmation email.`
+      }
+      footer={
+        <>
+          Wrong address?{' '}
+          <Link to="/register" className="font-semibold text-brand">
+            Start over
+          </Link>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {formErrors.length > 0 && (
+          <Alert>
+            {formErrors.map((message) => (
+              <p key={message}>{message}</p>
+            ))}
+          </Alert>
         )}
 
-        <Field
-          name="code"
-          label="Confirmation code"
-          className="field__code"
-          value={code}
-          error={codeError}
-          onChange={updateCode}
-          inputMode="numeric"
-          maxLength={CODE_LENGTH}
-          // Lets iOS and Android offer the code straight from the notification.
-          autoComplete="one-time-code"
-          autoFocus={Boolean(handedOver)}
-        />
+        {notice && <Alert tone="quiet">{notice}</Alert>}
 
-        <button type="submit" className="button" disabled={pending || stale}>
-          {pending ? 'Checking…' : 'Confirm email'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          {!handedOver && (
+            <Field
+              name="email"
+              label="Email address"
+              type="email"
+              value={email}
+              error={fieldErrors.email}
+              onChange={(event) => {
+                setEmail(event.target.value)
+                setFieldErrors({})
+              }}
+              autoComplete="email"
+              autoFocus
+            />
+          )}
 
-      <div className="auth__aside">
-        <p>
-          {stale
-            ? 'That code can no longer be used. Send yourself a new one.'
-            : 'Nothing in your inbox? Check spam, then try again.'}
-        </p>
-        <button
-          type="button"
-          className="button button--quiet"
-          onClick={handleResend}
-          disabled={resending || cooldown > 0}
-        >
-          {cooldown > 0 ? `Resend in ${cooldown}s` : resending ? 'Sending…' : 'Send a new code'}
-        </button>
+          <Field
+            name="code"
+            label="Confirmation code"
+            className="control-code"
+            value={code}
+            error={codeError}
+            onChange={updateCode}
+            inputMode="numeric"
+            maxLength={CODE_LENGTH}
+            // Lets iOS and Android offer the code straight from the notification.
+            autoComplete="one-time-code"
+            autoFocus={Boolean(handedOver)}
+          />
+
+          <Button type="submit" busy={pending} disabled={stale} className="mt-1 w-full">
+            {pending ? 'Checking…' : 'Confirm email'}
+          </Button>
+        </form>
+
+        <div className="flex flex-col items-start gap-2.5 border-t border-rule pt-4">
+          <p className="text-[13px] text-ink-2">
+            {stale
+              ? 'That code can no longer be used. Send yourself a new one.'
+              : 'Nothing in your inbox? Check spam, then try again.'}
+          </p>
+          <Button
+            variant="secondary"
+            busy={resending}
+            disabled={cooldown > 0}
+            onClick={handleResend}
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : resending ? 'Sending…' : 'Send a new code'}
+          </Button>
+        </div>
       </div>
-
-      <p className="auth__foot">
-        Wrong address? <Link to="/register">Start over</Link>
-      </p>
-    </main>
+    </AuthLayout>
   )
 }

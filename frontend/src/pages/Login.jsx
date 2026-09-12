@@ -4,6 +4,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { isUnverifiedEmailError, login } from '../api/auth'
 import { readErrors } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import Alert from '../components/Alert'
+import AuthLayout from '../components/AuthLayout'
+import Button from '../components/Button'
 import Field from '../components/Field'
 
 export default function Login() {
@@ -66,83 +69,81 @@ export default function Login() {
   }
 
   return (
-    <main className="auth">
-      <header className="auth__head">
-        <h1>Sign in</h1>
-        <p>Your ledger, your dealers, and today's collection.</p>
-      </header>
+    <AuthLayout
+      title="Sign in"
+      lede="Your ledger, your dealers, and today's collection."
+      footer={
+        <>
+          No account yet?{' '}
+          <Link to="/register" className="font-semibold text-brand">
+            Create one
+          </Link>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {notice && !unverified && formErrors.length === 0 && <Alert tone="good">{notice}</Alert>}
 
-      {notice && !unverified && formErrors.length === 0 && (
-        <div className="alert alert--good" role="status">
-          <p>{notice}</p>
-        </div>
-      )}
+        {unverified && (
+          <Alert>
+            <p>This email has not been confirmed yet.</p>
+            <p>
+              <Link to="/verify-email" state={{ email }}>
+                Enter your code
+              </Link>{' '}
+              to finish setting up the account.
+            </p>
+          </Alert>
+        )}
 
-      {unverified && (
-        <div className="alert" role="alert">
-          <p>This email has not been confirmed yet.</p>
-          <p>
-            <Link to="/verify-email" state={{ email }}>
-              Enter your code
-            </Link>{' '}
-            to finish setting up the account.
-          </p>
-        </div>
-      )}
+        {formErrors.length > 0 && (
+          <Alert>
+            {formErrors.map((message) => (
+              <p key={message}>{message}</p>
+            ))}
+          </Alert>
+        )}
 
-      {formErrors.length > 0 && (
-        <div className="alert" role="alert">
-          {formErrors.map((message) => (
-            <p key={message}>{message}</p>
-          ))}
-        </div>
-      )}
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <Field
+            name="email"
+            label="Email address"
+            type="email"
+            value={email}
+            error={fieldErrors.email}
+            onChange={(event) => {
+              setEmail(event.target.value)
+              setFieldErrors({})
+              setUnverified(false)
+            }}
+            autoComplete="email"
+            autoFocus={!location.state?.email}
+          />
+          <Field
+            name="password"
+            label="Password"
+            type="password"
+            value={password}
+            error={fieldErrors.password}
+            onChange={(event) => {
+              setPassword(event.target.value)
+              setFieldErrors({})
+            }}
+            autoComplete="current-password"
+            autoFocus={Boolean(location.state?.email)}
+          />
 
-      <form onSubmit={handleSubmit} noValidate>
-        <Field
-          name="email"
-          label="Email address"
-          type="email"
-          value={email}
-          error={fieldErrors.email}
-          onChange={(event) => {
-            setEmail(event.target.value)
-            setFieldErrors({})
-            setUnverified(false)
-          }}
-          autoComplete="email"
-          autoFocus={!location.state?.email}
-        />
-        <Field
-          name="password"
-          label="Password"
-          type="password"
-          value={password}
-          error={fieldErrors.password}
-          onChange={(event) => {
-            setPassword(event.target.value)
-            setFieldErrors({})
-          }}
-          autoComplete="current-password"
-          autoFocus={Boolean(location.state?.email)}
-        />
+          <Button type="submit" busy={pending} className="mt-1 w-full">
+            {pending ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
 
-        <button type="submit" className="button" disabled={pending}>
-          {pending ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
-
-      <div className="auth__aside">
-        <p>
-          <Link to="/forgot-password" state={{ email }}>
+        <p className="text-[13px]">
+          <Link to="/forgot-password" state={{ email }} className="font-medium text-brand">
             Forgot your password?
           </Link>
         </p>
       </div>
-
-      <p className="auth__foot">
-        No account yet? <Link to="/register">Create one</Link>
-      </p>
-    </main>
+    </AuthLayout>
   )
 }

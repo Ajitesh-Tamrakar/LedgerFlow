@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 // The dev server proxies /api to Django. The browser therefore only ever talks
 // to localhost:5173 -- no cross-origin request is made, so no CORS headers are
@@ -7,7 +8,9 @@ import react from '@vitejs/plugin-react'
 // in production, whatever serves the built files has to either serve /api from
 // the same origin too, or Django has to start sending real CORS headers.
 export default defineConfig({
-  plugins: [react()],
+  // Tailwind v4 runs as a Vite plugin now -- no postcss.config, no
+  // tailwind.config.js. The theme lives in src/styles/theme.css.
+  plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     proxy: {
