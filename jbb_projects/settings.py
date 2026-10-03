@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+
 from datetime import timedelta
 from os import getenv
 from pathlib import Path
@@ -21,184 +22,186 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h98la@y^5olz%s)#8xxghd$55+%$p)o&p3(jmxfsyovq1&%@t7'
+SECRET_KEY = "django-insecure-h98la@y^5olz%s)#8xxghd$55+%$p)o&p3(jmxfsyovq1&%@t7"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = getenv('IS_DEVELOPMENT', True)
+DEBUG = getenv("IS_DEVELOPMENT", True)
 
-ALLOWED_HOSTS = [
-    getenv('APP_HOST', 'localhost')
+ALLOWED_HOSTS = [getenv("APP_HOST", "localhost")]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
 ]
 
-
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+]
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
-
-    'rest_framework',
-    'rest_framework_simplejwt.token_blacklist',
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-
-    'django_filters',
-    'widget_tweaks',
-    'simple_history',
-    'accountancy',
+    "corsheaders",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "django_filters",
+    "widget_tweaks",
+    "simple_history",
+    "accountancy",
 ]
 
 SITE_ID = 1
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'jbb_projects.urls'
+ROOT_URLCONF = "jbb_projects.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'jbb_projects.wsgi.application'
+WSGI_APPLICATION = "jbb_projects.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
 
-
-
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     # Per-IP ceilings for the public OTP endpoints (defence in depth; the real
     # per-code limit is OTP['MAX_ATTEMPTS']). Scopes are set on the views.
-    'DEFAULT_THROTTLE_RATES': {
-        'otp_request': '10/hour',
-        'otp_verify': '20/hour',
+    "DEFAULT_THROTTLE_RATES": {
+        "otp_request": "10/hour",
+        "otp_verify": "20/hour",
     },
     # Filtering (?is_active=, ?search=, per-FilterSet) and sorting (?ordering=)
     # for every list endpoint. django-filter does the filtering; OrderingFilter
     # does the sort -- django-filter has no sort of its own.
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.OrderingFilter',
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
     ),
     # List responses are {count, next, previous, results: [...]}, 50 per page.
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 50,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 50,
 }
 
 REST_AUTH = {
-    'USE_JWT': True,
-    'SESSION_LOGIN': False,
-    'REGISTER_SERIALIZER': 'accountancy.serializers.CustomRegisterSerializer',
-    'USER_DETAILS_SERIALIZER': 'accountancy.serializers.CustomUserDetailsSerializer',  # nests `business`
-    'TOKEN_MODEL': None,  # JWT-only; not using DRF's legacy authtoken model
-    'JWT_AUTH_HTTPONLY': False,  # tokens in the response body, not cookies (needed for logout to read `refresh` from request data)
+    "USE_JWT": True,
+    "SESSION_LOGIN": False,
+    "REGISTER_SERIALIZER": "accountancy.serializers.CustomRegisterSerializer",
+    "USER_DETAILS_SERIALIZER": "accountancy.serializers.CustomUserDetailsSerializer",  # nests `business`
+    "TOKEN_MODEL": None,  # JWT-only; not using DRF's legacy authtoken model
+    "JWT_AUTH_HTTPONLY": True, 
+    "JWT_AUTH_REFRESH_COOKIE":'ledgerflow_refresh'
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # Email-based login, mandatory verification (catches a typo'd signup email
 # before it can lock the account owner out of a password reset later).
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_UNIQUE_EMAIL = True
 # Send a 6-digit code instead of a confirmation link. allauth still creates the
 # unverified EmailAddress and still calls send_confirmation_mail (registration +
 # /registration/resend-email/); the adapter swaps the link body for a code.
 # allauth's own RATE_LIMITS['confirm_email'] (1 / 3 min / email) gates resends.
-ACCOUNT_ADAPTER = 'accountancy.adapter.CodeEmailAdapter'
+ACCOUNT_ADAPTER = "accountancy.adapter.CodeEmailAdapter"
 
 # One-time-code engine (accountancy/otp.py). Every value has a matching default
 # in that module; this block is the single place to tune them.
 OTP = {
-    'CODE_LENGTH': 6,
-    'MAX_ATTEMPTS': 5,
-    'RESEND_COOLDOWN_SECONDS': 60,
-    'VERIFY_EMAIL_TTL_MINUTES': 15,
-    'PASSWORD_RESET_TTL_MINUTES': 10,
+    "CODE_LENGTH": 6,
+    "MAX_ATTEMPTS": 5,
+    "RESEND_COOLDOWN_SECONDS": 60,
+    "VERIFY_EMAIL_TTL_MINUTES": 15,
+    "PASSWORD_RESET_TTL_MINUTES": 10,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # dev only
-DEFAULT_FROM_EMAIL = 'LedgerFlow <no-reply@ledgerflow.local>'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # dev only
+DEFAULT_FROM_EMAIL = "LedgerFlow <no-reply@ledgerflow.local>"
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -208,14 +211,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_ROOT = BASE_DIR /'staticfiles'
-STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
 
 
-MEDIA_ROOT = BASE_DIR / 'uploads'
-MEDIA_URL = '/bill_imgs/'
+MEDIA_ROOT = BASE_DIR / "uploads"
+MEDIA_URL = "/bill_imgs/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -10,7 +10,7 @@ class DealerScopedMixin:
     with a message that doesn't confirm it exists elsewhere."""
 
     def validate_dealer(self, value):
-        if value.business_id != self.context["business"].id:
+        if value.business_id != self.context["business"].id: #type: ignore
             raise serializers.ValidationError("No such dealer.")
         return value
 
