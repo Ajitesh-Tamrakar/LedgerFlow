@@ -5,3 +5,4 @@ venv/
 uploads/
 staticfiles/
 .env
+.idea

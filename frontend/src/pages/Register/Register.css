@@ -1,0 +1,1004 @@
+.register-page {
+    position: relative;
+    min-height: 100vh;
+    padding: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    background:
+        repeating-linear-gradient(to bottom,
+            rgba(20, 21, 15, 0.055) 0 1px,
+            transparent 1px 30px),
+        radial-gradient(760px 540px at 10% 16%,
+            rgba(216, 241, 75, 0.38),
+            transparent 62%),
+        radial-gradient(660px 520px at 90% 8%,
+            rgba(220, 217, 245, 0.7),
+            transparent 60%),
+        radial-gradient(820px 600px at 80% 96%,
+            rgba(240, 230, 210, 0.85),
+            transparent 64%);
+}
+
+
+/* Main card */
+
+.register-card {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    max-width: 1060px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+
+    background: #FFFFFF;
+
+    border: 1px solid #E2E2DA;
+    border-radius: 28px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 40px 90px -34px rgba(20, 21, 15, 0.3);
+
+    animation:
+        riseIn 520ms cubic-bezier(.2, .7, .2, 1) both;
+}
+
+
+/* -------------------------------- */
+/* Left side */
+/* -------------------------------- */
+
+.register-info {
+    position: relative;
+    overflow: hidden;
+
+    padding: 30px 28px;
+
+    background: #14150F;
+    color: #FFFFFF;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 22px;
+
+    box-sizing: border-box;
+}
+
+
+/* Logo */
+
+.register-logo {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+}
+
+.register-logo span {
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 20px;
+    font-weight: 600;
+
+    letter-spacing: -0.02em;
+
+    color: #FFFFFF;
+}
+
+
+/* Intro */
+
+.register-intro {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.register-intro h1 {
+    margin: 0;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 29px;
+    line-height: 1.12;
+
+    font-weight: 600;
+
+    letter-spacing: -0.025em;
+}
+
+.register-intro p {
+    margin: 0;
+
+    max-width: 28ch;
+
+    font-size: 13.5px;
+    line-height: 1.6;
+
+    color: #D0D2C8;
+}
+
+
+/* Steps */
+
+.register-steps {
+    position: relative;
+    z-index: 1;
+
+    list-style: none;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 1px;
+}
+
+.register-step {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 6px 0;
+
+    font-size: 13px;
+
+    color: #777A70;
+}
+
+.register-step.active {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.step-number {
+    flex: 0 0 auto;
+
+    width: 25px;
+    height: 25px;
+
+    border-radius: 999px;
+
+    border: 1.5px solid #777A70;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.register-step.active .step-number {
+    background: #D8F14B;
+    border-color: #D8F14B;
+
+    color: #14150F;
+}
+
+
+/* Illustration */
+
+.register-art {
+    flex: 0 0 auto;
+
+    width: min(66%, 236px);
+
+    aspect-ratio: 1024 / 1536;
+
+    margin:
+        auto 0 0 -8px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+
+    animation:
+        artRise 720ms cubic-bezier(.2, .7, .2, 1) 160ms both;
+}
+
+.register-art img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position: bottom left;
+
+    animation:
+        artFloat 7s ease-in-out 1.2s infinite alternate;
+}
+
+
+/* -------------------------------- */
+/* Right side */
+/* -------------------------------- */
+
+.register-form-section {
+    padding: 30px 28px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+
+    min-width: 0;
+}
+
+
+/* Top bar */
+
+.register-topbar {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 8px;
+}
+
+.register-step-label {
+    border: 1px solid #DDDDD4;
+
+    border-radius: 999px;
+
+    padding: 5px 11px;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    letter-spacing: .14em;
+
+    text-transform: uppercase;
+
+    color: #5C6055;
+
+    white-space: nowrap;
+}
+
+.register-topbar a {
+    font-size: 12.5px;
+
+    color: #5C6055;
+
+    white-space: nowrap;
+}
+
+
+/* Progress */
+
+.register-progress {
+    height: 5px;
+
+    border-radius: 999px;
+
+    background: #F1F1EA;
+
+    overflow: hidden;
+}
+
+.register-progress-fill {
+    position: relative;
+
+    height: 100%;
+
+    width: 33.333%;
+
+    border-radius: 999px;
+
+    background: #D8F14B;
+
+    overflow: hidden;
+
+    transition:
+        width 480ms cubic-bezier(.2, .7, .2, 1);
+}
+
+
+/* Form */
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+
+    min-width: 0;
+}
+
+.register-header {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.register-header h2 {
+    margin: 0;
+
+    font-family: "Space Grotesk", sans-serif;
+
+    font-size: 22px;
+
+    font-weight: 600;
+
+    letter-spacing: -0.018em;
+}
+
+.register-header p {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #6B6F64;
+
+    line-height: 1.55;
+}
+
+
+/* Fields */
+
+.form-fields {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+.form-field>span {
+    font-size: 10.5px;
+
+    font-weight: 600;
+
+    letter-spacing: .12em;
+
+    text-transform: uppercase;
+
+    color: #6B6F64;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    height: 54px;
+
+    padding: 0 14px;
+
+    border: 1px solid #E2E2DA;
+
+    border-radius: 14px;
+
+    background: #FAFAF6;
+
+    transition:
+        border-color 200ms ease,
+        outline 200ms ease;
+}
+
+.input-wrapper:focus-within {
+    outline: 2px solid #14150F;
+    outline-offset: 2px;
+
+    border-color: #14150F;
+}
+
+.input-wrapper input {
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    width: 100%;
+
+    border: 0;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #14150F;
+
+    font-family: "DM Sans", system-ui, sans-serif;
+
+    font-size: 15.5px;
+}
+
+.input-wrapper input::placeholder {
+    color: #9A9D93;
+}
+
+
+/* Actions */
+
+.register-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    border-top: 1px solid #F1F1EA;
+    padding-top: 16px;
+}
+
+.register-actions button[type="submit"] {
+    flex: 1;
+
+    min-height: 46px;
+    padding: 0 22px;
+
+    border: 0;
+    border-radius: 999px;
+
+    background: #D8F14B;
+    color: #14150F;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        filter 180ms ease,
+        transform 120ms ease;
+}
+
+.register-actions button[type="submit"]:hover {
+    filter: brightness(.96);
+}
+
+.register-actions button[type="submit"]:active {
+    transform: scale(.99);
+}
+
+
+/* Small secondary Back button */
+.register-back-button {
+    flex: 0 0 auto;
+
+    min-height: 46px;
+    padding: 0 18px;
+
+    border: 1px solid #E2E2DA;
+    border-radius: 999px;
+
+    background: #FFFFFF;
+    color: #14150F;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background 150ms ease,
+        border-color 150ms ease;
+}
+
+.register-back-button:hover {
+    background: #F5F5F0;
+    border-color: #D5D5CC;
+}
+
+
+/* -------------------------------- */
+/* Animations */
+/* -------------------------------- */
+
+@keyframes riseIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes artRise {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes artFloat {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-8px);
+    }
+}
+
+
+/* -------------------------------- */
+/* Mobile */
+/* -------------------------------- */
+
+@media (max-width: 900px) {
+
+    .register-card {
+        grid-template-columns: 1fr;
+    }
+
+    .register-info {
+        padding: 28px;
+    }
+
+    .register-art {
+        width: min(46%, 170px);
+
+        margin:
+            14px 0 0 -6px;
+    }
+
+    .register-form-section {
+        padding: 30px 28px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+    }
+}
+
+/* ================================
+   PASSWORD INPUT
+================================ */
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+
+    height: 54px;
+
+    border: 1px solid #E2E2DA;
+    border-radius: 14px;
+
+    background: #FAFAF6;
+
+    padding: 0 8px 0 14px;
+
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: #14150F;
+    box-shadow: 0 0 0 3px rgba(20, 21, 15, 0.06);
+}
+
+.input-wrapper input {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 100%;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+
+    color: #14150F;
+}
+
+.input-wrapper input::placeholder {
+    color: #9A9C94;
+}
+
+
+/* ================================
+   SHOW / HIDE PASSWORD
+================================ */
+
+.input-wrapper button {
+    border: 0;
+
+    background: transparent;
+
+    color: #6B6F64;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    padding: 8px 7px;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+}
+
+.input-wrapper button:hover {
+    background: #EEEEEA;
+    color: #14150F;
+}
+
+
+/* ================================
+   PASSWORD STRENGTH
+================================ */
+
+.password-strength {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-top: -6px;
+}
+
+.strength-bars {
+    display: flex;
+
+    flex: 1;
+
+    gap: 5px;
+}
+
+.strength-bar {
+    height: 4px;
+
+    flex: 1;
+
+    border-radius: 999px;
+
+    background: #E5E5DE;
+
+    transition:
+        background 180ms ease,
+        transform 180ms ease;
+}
+
+.strength-bar.active {
+    background: #14150F;
+}
+
+.strength-label {
+    min-width: 70px;
+
+    text-align: right;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    color: #6B6F64;
+}
+
+
+/* ================================
+   REGISTER ACTIONS
+================================ */
+
+.register-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 8px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid #F1F1EA;
+}
+
+
+/* Continue / primary button */
+
+.register-actions button[type="submit"] {
+    flex: 1;
+
+    min-height: 46px;
+
+    border: 0;
+
+    border-radius: 999px;
+
+    background: #D8F14B;
+
+    color: #14150F;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 150ms ease,
+        background 150ms ease;
+}
+
+.register-actions button[type="submit"]:hover {
+    background: #CBE53F;
+
+    transform: translateY(-1px);
+}
+
+
+/* Back button */
+
+.register-back-button {
+    min-height: 46px;
+
+    padding: 0 18px;
+
+    border: 1px solid #E2E2DA;
+
+    border-radius: 999px;
+
+    background: #FFFFFF;
+
+    color: #14150F;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background 150ms ease,
+        border-color 150ms ease;
+}
+
+.register-back-button:hover {
+    background: #F5F5F0;
+
+    border-color: #D5D5CC;
+}
+
+/* =================================
+   STEP 3 — OTP
+================================= */
+
+.otp-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+
+    width: 100%;
+    max-width: 366px;
+}
+
+.otp-inputs input {
+    width: 100%;
+    min-width: 0;
+    height: 58px;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    border: 1.5px solid #E2E2DA;
+    border-radius: 14px;
+
+    background: #FAFAF6;
+    color: #14150F;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+
+    padding: 0;
+
+    outline: none;
+
+    transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.otp-inputs input:focus {
+    border-color: #14150F;
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 0 0 3px rgba(20, 21, 15, 0.06);
+}
+
+
+/* =================================
+   OTP ACTIONS
+================================= */
+
+.otp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 10px;
+
+    border-top: 1px solid #F1F1EA;
+
+    padding-top: 16px;
+}
+
+
+/* Main button */
+
+.otp-verify-button {
+    flex: 1 1 180px;
+
+    border: 0;
+
+    background: #D8F14B;
+    color: #14150F;
+
+    border-radius: 999px;
+
+    min-height: 46px;
+
+    padding: 0 22px;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+
+    letter-spacing: -0.01em;
+
+    cursor: pointer;
+
+    transition:
+        filter 180ms ease,
+        transform 120ms ease;
+}
+
+.otp-verify-button:hover {
+    filter: brightness(.96);
+}
+
+.otp-verify-button:active {
+    transform: scale(.99);
+}
+
+
+/* Resend */
+
+.otp-resend-button {
+    flex: 0 0 auto;
+
+    border: 1px solid #DDDDD4;
+
+    background: #FFFFFF;
+    color: #5C6055;
+
+    border-radius: 999px;
+
+    min-height: 46px;
+
+    padding: 0 20px;
+
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        border-color 160ms ease,
+        color 160ms ease;
+}
+
+.otp-resend-button:hover {
+    border-color: #14150F;
+    color: #14150F;
+}
+
+
+/* =================================
+   WRONG EMAIL
+================================= */
+
+.otp-edit-email {
+    align-self: flex-start;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #5C6055;
+
+    font-family: "DM Sans", sans-serif;
+    font-size: 12.5px;
+
+    padding: 0;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    transition: color 160ms ease;
+}
+
+.otp-edit-email:hover {
+    color: #14150F;
+}
+
+
+/* =================================
+   MOBILE
+================================= */
+
+@media (max-width: 500px) {
+
+    .otp-inputs {
+        gap: 5px;
+    }
+
+    .otp-inputs input {
+        height: 52px;
+
+        font-size: 20px;
+    }
+
+    .otp-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .otp-verify-button,
+    .otp-resend-button {
+        width: 100%;
+    }
+}
