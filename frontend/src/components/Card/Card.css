@@ -1,0 +1,21 @@
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E2E2DA;
+  border-radius: 26px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.card--accent {
+  background: #D8F14B;
+  border: none;
+}
+
+.card--dark {
+  background: #14150F;
+  color: #F6F7F2;
+  border: none;
+}

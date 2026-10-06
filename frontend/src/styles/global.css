@@ -1,0 +1,94 @@
+/* =========================
+   Global Reset
+   ========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "DM Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  background: #EEEEE9;
+  color: #14150F;
+}
+
+
+/* =========================
+   Typography
+   ========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+p {
+  margin: 0;
+}
+
+
+/* =========================
+   Form Elements
+   ========================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  white-space: nowrap;
+}
+
+
+/* =========================
+   Links
+   ========================= */
+
+a {
+  color: #14150F;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: #5C6055;
+}
+
+
+/* =========================
+   Accessibility
+   ========================= */
+
+*:focus-visible {
+  outline: 2px solid #14150F;
+  outline-offset: 2px;
+}
+
+
+/* =========================
+   Reduced Motion
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

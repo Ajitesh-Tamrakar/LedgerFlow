@@ -1,0 +1,32 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-field__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #14150F;
+}
+
+.form-field__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border: 1px solid #E2E2DA;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #14150F;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-field__input::placeholder {
+  color: #8A8C83;
+}
+
+.form-field__input:focus {
+  border-color: #14150F;
+}

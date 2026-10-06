@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 
 import { loginUser } from "../../api/auth";
 
 import openLedgerImg from "../../assets/open-ledger.png";
+import { Navigate } from "react-router-dom";
 
 function Login() {
     // Form state
@@ -18,6 +19,7 @@ function Login() {
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(true);
+    const navigate = useNavigate()
 
     // Validation state
     const [touched, setTouched] = useState({
@@ -112,7 +114,7 @@ function Login() {
     // LOGIN
     // ==========================================
 
-    async function handleLogin(e) {
+  async function handleLogin(e) {
         e.preventDefault();
 
         if (loading) {
@@ -196,7 +198,8 @@ function Login() {
             );
 
             // Send user to the application.
-            window.location.href = "/";
+            // window.location.href = "/";
+            navigate('/dashboard')
 
         } catch (error) {
             console.error(

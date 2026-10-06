@@ -1,0 +1,15 @@
+.page-shell {
+  background: #EEEEE9;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #14150F;
+  padding: 18px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.page-shell__container {
+  max-width: 1420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}

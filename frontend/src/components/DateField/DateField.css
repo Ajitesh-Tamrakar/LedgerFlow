@@ -1,0 +1,402 @@
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-start;
+}
+
+.date-field__label {
+  font-size: 12px;
+  color: #6B6F64;
+}
+
+.date-field__calendar-root {
+  position: relative;
+}
+.date-field__trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 38px;
+  padding: 0 14px;
+
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+
+  background: #FAFAF6;
+  cursor: pointer;
+
+  font-family: inherit;
+}
+
+.date-field__trigger:hover {
+  border-color: #14150F;
+}
+
+.date-field__trigger--open {
+  background: #F3F3ED;
+  border-color: #14150F;
+}
+
+.date-field__trigger-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B6F64;
+}
+
+.date-field__trigger-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #14150F;
+  white-space: nowrap;
+}
+
+.date-field__caret {
+  font-size: 9px;
+  color: #6B6F64;
+  transition: transform 180ms ease;
+}
+
+.date-field__caret--open {
+  transform: rotate(180deg);
+}
+
+
+/* Calendar */
+
+.date-field__calendar {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  z-index: 30;
+
+  width: 296px;
+  box-sizing: border-box;
+
+  padding: 16px;
+
+  background: #FFFFFF;
+  border: 1px solid #E2E2DA;
+  border-radius: 22px;
+
+  box-shadow: 0 20px 44px rgba(20, 21, 15, 0.16);
+
+  animation: date-field-panel-in 190ms
+    cubic-bezier(.2, .7, .2, 1) both;
+
+  transform-origin: top right;
+}
+
+@keyframes date-field-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* Header */
+
+.date-field__calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.date-field__nav {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: 1px solid #E6E6DE;
+  border-radius: 11px;
+
+  background: #FFFFFF;
+  color: #14150F;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-field__nav:hover {
+  border-color: #14150F;
+}
+
+.date-field__nav:disabled {
+  color: #C5C7BE;
+  cursor: default;
+}
+
+.date-field__nav:disabled:hover {
+  border-color: #E6E6DE;
+}
+
+.date-field__month-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 32px;
+  padding: 0 12px;
+
+  border: 1px solid #E6E6DE;
+  border-radius: 999px;
+
+  background: #FFFFFF;
+  color: #14150F;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.date-field__month-button:hover {
+  border-color: #14150F;
+}
+
+.date-field__month-button--active {
+  background: #F3F3ED;
+  border-color: #14150F;
+}
+
+.date-field__month-caret {
+  font-size: 8px;
+  color: #6B6F64;
+  transition: transform 180ms ease;
+}
+
+.date-field__month-caret--open {
+  transform: rotate(180deg);
+}
+
+
+/* Month selection */
+
+.date-field__months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.date-field__month-cell {
+  height: 44px;
+  padding: 0;
+
+  border: 1.5px solid transparent;
+  border-radius: 13px;
+
+  background: #FAFAF6;
+  color: #14150F;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+}
+
+.date-field__month-cell:hover {
+  background: #F1F1EA;
+}
+
+.date-field__month-cell--today {
+  border-color: #C9CABF;
+  font-weight: 600;
+}
+
+.date-field__month-cell--selected {
+  background: #14150F;
+  border-color: #14150F;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.date-field__month-cell:disabled {
+  color: #C5C7BE;
+  cursor: default;
+}
+
+.date-field__month-cell:disabled:hover {
+  background: #FAFAF6;
+}
+
+
+/* Weekdays */
+
+.date-field__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.date-field__weekdays span {
+  text-align: center;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #9A9E92;
+}
+
+
+/* Days */
+
+.date-field__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.date-field__day {
+  position: relative;
+
+  height: 36px;
+  padding: 0;
+
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+
+  background: transparent;
+  color: #14150F;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.date-field__day:hover {
+  background: #F3F3ED;
+}
+
+.date-field__day--today {
+  border-color: #C9CABF;
+  font-weight: 600;
+}
+
+.date-field__day--selected {
+  background: #14150F;
+  border-color: #14150F;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.date-field__day--selected:hover {
+  background: #14150F;
+}
+
+.date-field__day--future {
+  color: #C5C7BE;
+  cursor: default;
+}
+
+.date-field__day--future:hover {
+  background: transparent;
+}
+
+.date-field__empty {
+  height: 36px;
+}
+
+
+/* Entry dot */
+
+.date-field__dot {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 999px;
+  background: transparent;
+}
+
+.date-field__dot--saved {
+  background: #14150F;
+}
+
+.date-field__dot--selected {
+  background: #D8F14B;
+}
+
+
+/* Footer */
+
+.date-field__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  margin-top: 14px;
+  padding-top: 12px;
+
+  border-top: 1px solid #F1F1EA;
+}
+
+.date-field__saved-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 11px;
+  color: #6B6F64;
+}
+
+.date-field__saved-dot {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 999px;
+  background: #14150F;
+}
+
+.date-field__today {
+  min-height: 32px;
+  padding: 0 14px;
+
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+
+  background: #FFFFFF;
+  color: #14150F;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.date-field__today:hover {
+  border-color: #14150F;
+}

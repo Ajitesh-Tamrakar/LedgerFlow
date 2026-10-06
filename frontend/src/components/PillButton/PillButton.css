@@ -1,0 +1,30 @@
+.pill-button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.pill-button--default {
+  background: #14150F;
+  color: #F6F7F2;
+}
+
+.pill-button--accent {
+  background: #D8F14B;
+  color: #14150F;
+}
+
+.pill-button--light {
+  background: #FFFFFF;
+  color: #14150F;
+  border: 1px solid #E2E2DA;
+}
+
+.pill-button:hover {
+  opacity: 0.85;
+}

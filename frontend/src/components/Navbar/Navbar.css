@@ -1,0 +1,107 @@
+.navbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    background: #ffffff;
+    border: 1px solid #e2e2da;
+    border-radius: 999px;
+    padding: 8px;
+}
+
+.navbar__brand {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.navbar__brand img {
+    height: 50px;
+    width: auto;
+    display: block;
+}
+
+.navbar__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.navbar__link {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #e6e6de;
+    background: #ffffff;
+    color: #5c6055;
+
+    border-radius: 999px;
+    min-height: 38px;
+    padding: 0 16px;
+
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition:
+        background 180ms ease,
+        color 180ms ease,
+        border-color 180ms ease,
+        transform 120ms ease;
+}
+
+.navbar__link:hover {
+    border-color: #14150f;
+}
+
+.navbar__link:active {
+    transform: scale(0.97);
+}
+
+.navbar__link--active {
+    background: #14150f;
+    color: #ffffff;
+    border-color: #14150f;
+}
+
+.navbar__account {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 6px;
+}
+
+.navbar__avatar {
+    width: 38px;
+    height: 38px;
+
+    border: 0;
+    border-radius: 999px;
+
+    background: #dcd9f5;
+    color: #14150f;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: background 160ms ease;
+}
+
+.navbar__avatar:hover {
+    background: #cfcbf0;
+}
