@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from accountancy.api.converters import DateConverter
 from accountancy.api.views import (
     BillViewSet, BusinessView, CashbookByDateView, CashbookListView,
-    DealerViewSet, PaymentViewSet, TaskViewSet,
+    CollectionTrendView, DashboardSummaryView, DealerViewSet, PaymentViewSet, TaskViewSet,
 )
 
 register_converter(DateConverter, "date")
@@ -19,4 +19,6 @@ urlpatterns = router.urls + [
     path("business/", BusinessView.as_view(), name="business"),
     path("cashbook/", CashbookListView.as_view(), name="cashbook-list"),
     path("cashbook/by-date/<date:date>/", CashbookByDateView.as_view(), name="cashbook-by-date"),
+    path("collection-trend/", CollectionTrendView.as_view(), name="collection-trend"),
+    path("dashboard-summary/", DashboardSummaryView.as_view(), name="dashboard-summary"),
 ]

@@ -1,6 +1,8 @@
 import re
 import shutil
 import tempfile
+from datetime import date
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -15,6 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.account.models import EmailAddress
 
 from accountancy import otp
+from accountancy.api.views import CollectionTrendView
 from accountancy.models import Bill, Business, Cashbook, Dealer, OTPCode, Payment, Task
 
 User = get_user_model()
@@ -697,3 +700,118 @@ class CashbookAPITests(TestCase):
 
     def test_negative_amount_rejected(self):
         self.assertEqual(self.put_day(upi=-5).status_code, 400)
+
+
+class CollectionTrendAPITests(TestCase):
+    """The computed summary: period comparison + gap-filled trend.
+
+    Not a viewset -- no model behind it, so there is no list/CRUD to test;
+    only the calculation, the scoping, and the auth pair."""
+
+    URL = "/api/collection-trend/"
+
+    def setUp(self):
+        self.a = User.objects.create_user("cta", "cta@example.com", "pw")
+        self.biz_a = Business.objects.create(name="A Traders", owner=self.a)
+        self.b = User.objects.create_user("ctb", "ctb@example.com", "pw")
+        self.biz_b = Business.objects.create(name="B Traders", owner=self.b)
+        self.client = APIClient()
+        as_user(self.client, self.a)
+
+    def _cash(self, business, day, **amounts):
+        return Cashbook.objects.create(business=business, date=day, **amounts)
+
+    def request_trend(self, day, **params):
+        # pin "today" so the calendar periods are the same no matter when the suite runs
+        with mock.patch.object(CollectionTrendView, "_today", return_value=day):
+            return self.client.get(self.URL, params or None)
+
+    # --- month: the spec's own example (1,72,000 vs 1,64,000 -> +4.88%) ---
+    def test_month_matches_the_spec_example(self):
+        self._cash(self.biz_a, date(2026, 10, 1), cards="172000")
+        self._cash(self.biz_a, date(2026, 9, 15), cards="164000")
+        data = self.request_trend(date(2026, 10, 8)).data
+
+        self.assertEqual(data["period"], "month")
+        self.assertEqual(data["granularity"], "day")
+        self.assertEqual(data["current"], {
+            "label": "October", "start": "2026-10-01", "end": "2026-10-31",
+            "total": "172000.00",
+        })
+        self.assertEqual(data["previous"]["label"], "September")
+        self.assertEqual(data["previous"]["total"], "164000.00")
+        self.assertEqual(data["change_percent"], 4.88)
+        self.assertEqual(len(data["trend"]), 31)                    # full axis...
+        self.assertEqual(data["trend"][0]["amount"], "172000.00")
+        self.assertEqual(data["trend"][1]["amount"], "0.00")        # ...missing days as 0
+
+    # --- week: calendar week, day buckets, previous week compared ---
+    def test_week_buckets_by_day_across_the_calendar_week(self):
+        self._cash(self.biz_a, date(2026, 10, 6), upi=30)
+        self._cash(self.biz_a, date(2026, 10, 8), cash=20)
+        self._cash(self.biz_a, date(2026, 9, 30), cards=10)    # previous week
+        self._cash(self.biz_a, date(2026, 10, 12), upi=999)    # next week, excluded
+        data = self.request_trend(date(2026, 10, 8), period="week").data
+
+        self.assertEqual(data["current"]["label"], "Wk of 5 Oct")
+        self.assertEqual(data["current"]["total"], "50.00")
+        self.assertEqual(data["previous"]["label"], "Wk of 28 Sep")
+        self.assertEqual(data["previous"]["total"], "10.00")
+        self.assertEqual(data["change_percent"], 400.0)
+        self.assertEqual(len(data["trend"]), 7)
+        self.assertEqual(data["trend"][1]["label"], "6 Oct")
+        self.assertEqual(data["trend"][1]["amount"], "30.00")
+
+    # --- quarter: week buckets (90+ daily points would be unreadable) ---
+    def test_quarter_buckets_by_week(self):
+        self._cash(self.biz_a, date(2026, 10, 5), upi=100)     # first bucket
+        self._cash(self.biz_a, date(2026, 11, 2), upi=50)
+        self._cash(self.biz_a, date(2026, 12, 30), cards=25)   # last partial week
+        self._cash(self.biz_a, date(2026, 9, 28), upi=999)     # Q3 -> the previous period
+        data = self.request_trend(date(2026, 10, 8), period="quarter").data
+
+        self.assertEqual(data["granularity"], "week")
+        self.assertEqual(data["current"]["label"], "Q4 2026")
+        self.assertEqual(data["previous"]["label"], "Q3 2026")
+        self.assertEqual(data["current"]["total"], "175.00")
+        self.assertEqual(data["previous"]["total"], "999.00")
+        self.assertEqual(data["change_percent"], -82.48)
+        self.assertEqual(len(data["trend"]), 14)
+
+    # --- comparison edge cases ---
+    def test_zero_previous_period_reports_null_change(self):
+        self._cash(self.biz_a, date(2026, 10, 8), upi=100)
+        data = self.request_trend(date(2026, 10, 8), period="week").data
+        self.assertEqual(data["previous"]["total"], "0.00")
+        self.assertIsNone(data["change_percent"])
+
+    def test_previous_period_crosses_the_year_boundary(self):
+        self._cash(self.biz_a, date(2026, 1, 1), upi=7)
+        self._cash(self.biz_a, date(2025, 12, 15), upi=5)
+        data = self.request_trend(date(2026, 1, 1)).data
+        self.assertEqual(data["current"]["label"], "January")
+        self.assertEqual(data["previous"]["label"], "December")
+        self.assertEqual(data["current"]["total"], "7.00")
+        self.assertEqual(data["previous"]["total"], "5.00")
+        self.assertEqual(data["change_percent"], 40.0)
+
+    # --- scoping + auth + gating (the mixin) ---
+    def test_another_business_collections_are_excluded(self):
+        self._cash(self.biz_a, date(2026, 10, 1), upi=100)
+        self._cash(self.biz_b, date(2026, 10, 1), upi=9999)
+        self.assertEqual(self.request_trend(date(2026, 10, 8)).data["current"]["total"], "100.00")
+
+    def test_invalid_period_is_400(self):
+        resp = self.request_trend(date(2026, 10, 8), period="year")
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("period", resp.data)
+
+    def test_period_param_is_case_insensitive(self):
+        self.assertEqual(self.request_trend(date(2026, 10, 8), period="Month").status_code, 200)
+
+    def test_write_methods_and_missing_accounts_rejected(self):
+        self.assertEqual(self.client.post(self.URL, {}).status_code, 405)
+        self.client.credentials()
+        self.assertEqual(self.client.get(self.URL).status_code, 401)
+        as_user(self.client, User.objects.create_user("ctz", "ctz@example.com", "pw"))
+        self.assertEqual(self.client.get(self.URL).status_code, 403)

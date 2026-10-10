@@ -49,10 +49,11 @@ class TaskSerializer(serializers.ModelSerializer):
 class BillSerializer(DealerScopedMixin, serializers.ModelSerializer):
     image = serializers.FileField(write_only=True)      # upload only -- never echoed back
     file_url = serializers.SerializerMethodField()      # the only way to read the PDF
+    dealer_name = serializers.CharField(source="dealer.name", read_only=True)  # name for lists
 
     class Meta:
         model = Bill
-        fields = ["id", "image", "file_url", "date", "dealer", "amount",
+        fields = ["id", "image", "file_url", "date", "dealer", "dealer_name", "amount",
                   "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
@@ -70,9 +71,11 @@ class BillSerializer(DealerScopedMixin, serializers.ModelSerializer):
 
 
 class PaymentSerializer(DealerScopedMixin, serializers.ModelSerializer):
+    dealer_name = serializers.CharField(source="dealer.name", read_only=True)  # name for lists
+
     class Meta:
         model = Payment
-        fields = ["id", "dealer", "date", "amount", "method", "created_at", "updated_at"]
+        fields = ["id", "dealer", "dealer_name", "date", "amount", "method", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
@@ -95,3 +98,79 @@ class CashbookSerializer(serializers.ModelSerializer):
         # date comes from the URL on PUT (injected by the view); total is the DB
         # GeneratedField -- both read-only, never accepted from the body.
         read_only_fields = ["id", "date", "created_at", "updated_at"]
+
+
+# --- Computed summaries (no model behind them) ----------------------------------
+# Plain Serializers, not ModelSerializer: the view builds every value itself, so
+# there is no model row to map. These just pin the response shape.
+# max_digits=14: a single Cashbook total is capped at 10 digits, but a headline
+# total sums up to a whole quarter of rows, so widen the display.
+
+class PeriodSummarySerializer(serializers.Serializer):
+    label = serializers.CharField()       # "October" / "Wk of 5 Oct" / "Q4 2026"
+    start = serializers.DateField()
+    end = serializers.DateField()
+    total = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class TrendPointSerializer(serializers.Serializer):
+    bucket = serializers.DateField()      # ISO -- the bucket's day (or its Monday)
+    label = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class CollectionTrendSerializer(serializers.Serializer):
+    period = serializers.ChoiceField(choices=["week", "month", "quarter"])
+    granularity = serializers.ChoiceField(choices=["day", "week"])
+    current = PeriodSummarySerializer()
+    previous = PeriodSummarySerializer()
+    change_percent = serializers.FloatField(allow_null=True)  # null when previous was 0
+    trend = TrendPointSerializer(many=True)
+
+
+# The dashboard's five summary cards in one tray. The view does the adding;
+# these just pin the names and types of the numbers it hands back.
+# (max_digits=14: same widening rationale as PeriodSummarySerializer.)
+
+class InProgressSerializer(serializers.Serializer):
+    total = serializers.DecimalField(max_digits=14, decimal_places=2)
+    elapsed_days = serializers.IntegerField()
+    period_days = serializers.IntegerField()
+    pace_delta_percent = serializers.FloatField(allow_null=True)  # null when the baseline was 0
+    prev_same_days_total = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class NetCashFlowSerializer(serializers.Serializer):
+    collected = serializers.DecimalField(max_digits=14, decimal_places=2)
+    paid = serializers.DecimalField(max_digits=14, decimal_places=2)
+    amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class PurchasingSerializer(serializers.Serializer):
+    bills = serializers.DecimalField(max_digits=14, decimal_places=2)
+    bill_count = serializers.IntegerField()
+    payments = serializers.DecimalField(max_digits=14, decimal_places=2)
+    payment_count = serializers.IntegerField()
+
+
+class DealerBalanceSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    gstin = serializers.CharField(allow_null=True)
+    balance = serializers.DecimalField(max_digits=14, decimal_places=2)
+
+
+class OutstandingSerializer(serializers.Serializer):
+    total = serializers.DecimalField(max_digits=14, decimal_places=2)
+    dealer_count = serializers.IntegerField()
+    owed = serializers.DecimalField(max_digits=14, decimal_places=2)
+    credit = serializers.DecimalField(max_digits=14, decimal_places=2)
+    dealers = DealerBalanceSerializer(many=True)
+
+
+class DashboardSummarySerializer(serializers.Serializer):
+    period = serializers.ChoiceField(choices=["week", "month", "quarter"])
+    in_progress = InProgressSerializer()
+    net_cash_flow = NetCashFlowSerializer()
+    purchasing = PurchasingSerializer()
+    outstanding = OutstandingSerializer()
