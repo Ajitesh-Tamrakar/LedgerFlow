@@ -1,0 +1,106 @@
+/* The left rail: account card + in-page section jumps.
+   The settings-rise keyframe lives in Settings.css (shared). */
+
+.settings-rail {
+  position: sticky;
+  top: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  animation: settings-rise 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.settings-rail__card {
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 22px;
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-rail__avatar {
+  width: 52px;
+  height: 52px;
+
+  border-radius: 999px;
+  background: #e4e7c9;
+  color: #14150f;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+
+  transition: background 300ms ease;
+}
+
+.settings-rail__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-rail__name {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  overflow-wrap: anywhere;
+}
+
+.settings-rail__email {
+  font-size: 12.5px;
+  color: #6b6f64;
+  overflow-wrap: anywhere;
+}
+
+.settings-rail__since {
+  font-size: 12px;
+  color: #8e9285;
+}
+
+.settings-rail__nav {
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 22px;
+  padding: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-rail__link {
+  display: flex;
+  align-items: center;
+
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3a3e2f;
+  text-decoration: none;
+
+  transition: background 160ms ease;
+}
+
+.settings-rail__link:hover {
+  background: #f3f3ed;
+}
+
+@media (max-width: 900px) {
+  .settings-rail {
+    position: static;
+  }
+}

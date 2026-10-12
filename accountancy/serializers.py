@@ -151,6 +151,23 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         otp.send_code_email(email, code, OTPCode.PURPOSE_PASSWORD_RESET)
 
 
+class PasswordResetVerifySerializer(serializers.Serializer):
+    """The settings page's "Verify code" button.
+
+    Checks the code without consuming it, so the same code can be handed to
+    the confirm step that follows. (The ForgotPassword page skips straight to
+    confirm and never calls this.)"""
+    email = serializers.EmailField()
+    code = serializers.CharField(min_length=otp.CODE_LENGTH, max_length=otp.CODE_LENGTH)
+
+    def validate(self, attrs):
+        try:
+            otp.check(attrs['email'], OTPCode.PURPOSE_PASSWORD_RESET, attrs['code'])
+        except otp.OTPError as exc:
+            raise serializers.ValidationError({'code': str(exc)})
+        return attrs
+
+
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(min_length=otp.CODE_LENGTH, max_length=otp.CODE_LENGTH)

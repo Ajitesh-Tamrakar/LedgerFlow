@@ -33,6 +33,7 @@ REFRESH_URL = '/api/auth/token/refresh/'
 USER_URL = '/api/auth/user/'
 VERIFY_CODE_URL = '/api/auth/otp/verify-email/'
 RESET_REQUEST_URL = '/api/auth/otp/password/request/'
+RESET_VERIFY_URL = '/api/auth/otp/password/verify/'
 RESET_CONFIRM_URL = '/api/auth/otp/password/confirm/'
 
 
@@ -164,6 +165,68 @@ class AuthFlowTests(TestCase):
         resp = client.post(RESET_REQUEST_URL, {'email': 'nobody@example.com'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_password_reset_verify_does_not_consume(self):
+        """The settings-page "Verify code" gate: the code is checked, not
+        consumed, so the same code still works in the confirm step that
+        follows (the design's whole reason for the endpoint)."""
+        client = APIClient()
+        email, old_pw, new_pw = 'resetverify@example.com', 'S3cur3Pass!123', 'Br4ndNewPass!456'
+        self.register(client, email, old_pw)
+        client.post(VERIFY_CODE_URL, {'email': email, 'code': last_code()}, format='json')
+
+        client.post(RESET_REQUEST_URL, {'email': email}, format='json')
+        code = last_code()
+
+        resp = client.post(RESET_VERIFY_URL, {'email': email, 'code': code}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
+
+        # the code is still live after verify
+        row = OTPCode.objects.filter(
+            email=email, purpose=OTPCode.PURPOSE_PASSWORD_RESET
+        ).first()
+        self.assertIsNone(row.consumed_at)
+
+        # and the same code now confirms
+        resp = client.post(
+            RESET_CONFIRM_URL,
+            {'email': email, 'code': code,
+             'new_password1': new_pw, 'new_password2': new_pw},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.data)
+
+    def test_password_reset_verify_counts_attempts(self):
+        """Failed verifies burn attempts exactly like confirm does; the fifth
+        failure locks the code out, and the right code no longer passes
+        either gate."""
+        client = APIClient()
+        email = 'resetlock@example.com'
+        self.register(client, email, 'S3cur3Pass!123')
+        client.post(VERIFY_CODE_URL, {'email': email, 'code': last_code()}, format='json')
+
+        client.post(RESET_REQUEST_URL, {'email': email}, format='json')
+        code = last_code()
+        wrong = '000000' if code != '000000' else '111111'
+
+        for _ in range(otp.MAX_ATTEMPTS):
+            resp = client.post(RESET_VERIFY_URL, {'email': email, 'code': wrong}, format='json')
+            self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST, resp.data)
+
+        row = OTPCode.objects.filter(
+            email=email, purpose=OTPCode.PURPOSE_PASSWORD_RESET
+        ).first()
+        self.assertIsNotNone(row.consumed_at)  # locked out on the fifth failure
+
+        resp = client.post(RESET_VERIFY_URL, {'email': email, 'code': code}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST, resp.data)
+        resp = client.post(
+            RESET_CONFIRM_URL,
+            {'email': email, 'code': code,
+             'new_password1': 'Br4ndNewPass!456', 'new_password2': 'Br4ndNewPass!456'},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST, resp.data)
 
 
 class DuplicateRegistrationTests(TestCase):

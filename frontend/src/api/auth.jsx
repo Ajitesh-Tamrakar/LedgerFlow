@@ -200,3 +200,65 @@ export async function confirmPasswordReset({
         }
     );
 }
+
+
+/* ========================================
+   Settings page
+   ======================================== */
+
+// The signed-in user. The payload nests a read-only copy of the
+// caller's business ({id, name}), so a post-login bootstrap is one call.
+export async function getAuthUser() {
+    return apiRequest("/auth/user/");
+}
+
+// Password mode: the current password is required. dj-rest-auth checks
+// it and runs the stock validators on the new one. The session survives
+// the change (the user stays signed in), which is what the design's
+// "done" banner relies on.
+export async function changePassword({
+    old_password,
+    new_password1,
+    new_password2,
+}) {
+    return apiRequest(
+        "/auth/password/change/",
+        {
+            method: "POST",
+
+            body: JSON.stringify({
+                old_password,
+                new_password1,
+                new_password2,
+            }),
+        }
+    );
+}
+
+// The settings "Verify code" button: checks the reset code WITHOUT
+// consuming it, so the same code can still be confirmed afterwards.
+export async function verifyPasswordResetCode({
+    email,
+    code,
+}) {
+    return apiRequest(
+        "/auth/otp/password/verify/",
+        {
+            method: "POST",
+
+            body: JSON.stringify({
+                email,
+                code,
+            }),
+        }
+    );
+}
+
+// Sign out. Blacklists the refresh token server-side and clears the
+// HttpOnly refresh cookie; the access token in localStorage is dropped
+// by the caller before the redirect.
+export async function logout() {
+    return apiRequest("/auth/logout/", {
+        method: "POST",
+    });
+}

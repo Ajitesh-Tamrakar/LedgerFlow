@@ -1,11 +1,12 @@
 """Code-based email verification and password reset.
 
-Three public endpoints that fill the gap dj-rest-auth doesn't cover. Everything
+Four public endpoints that fill the gap dj-rest-auth doesn't cover. Everything
 else (login / logout / refresh / registration / password-change) stays on
 dj-rest-auth untouched.
 
     POST /api/auth/otp/verify-email/      {email, code}
     POST /api/auth/otp/password/request/  {email}
+    POST /api/auth/otp/password/verify/   {email, code}   (checks, does not consume)
     POST /api/auth/otp/password/confirm/  {email, code, new_password1, new_password2}
 """
 from rest_framework.permissions import AllowAny
@@ -16,6 +17,7 @@ from rest_framework.views import APIView
 from accountancy.serializers import (
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
+    PasswordResetVerifySerializer,
     VerifyEmailCodeSerializer,
 )
 
@@ -48,6 +50,15 @@ class PasswordResetRequestView(_PublicAuthView):
         return Response(
             {'detail': 'If that email has an account, a reset code has been sent.'}
         )
+
+
+class PasswordResetVerifyView(_PublicAuthView):
+    throttle_scope = 'otp_verify'
+
+    def post(self, request):
+        serializer = PasswordResetVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'detail': 'Code verified.'})
 
 
 class PasswordResetConfirmView(_PublicAuthView):

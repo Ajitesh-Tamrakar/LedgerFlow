@@ -1,0 +1,165 @@
+/* The business name card (accent background).
+   settings-rise / settings-breathe / the shake keyframes live in Settings.css. */
+
+.settings-card--business {
+  background: #e4e7c9;
+
+  animation-delay: 60ms;
+}
+
+.settings-biz__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-biz__field {
+  display: flex;
+  align-items: center;
+
+  border: 1px solid rgba(20, 21, 15, 0.28);
+  border-radius: 16px;
+  padding: 0 16px;
+  height: 62px;
+
+  background: rgba(255, 255, 255, 0.75);
+
+  transition: border-color 180ms ease;
+}
+
+.settings-biz__field.is-invalid {
+  border-color: #8a3a2c;
+}
+
+.settings-biz__field:focus-within {
+  outline: 2px solid #14150f;
+  outline-offset: 2px;
+}
+
+.settings-biz__input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: clamp(19px, 2.2vw, 23px);
+  letter-spacing: -0.02em;
+  color: #14150f;
+
+  outline: none;
+}
+
+.settings-biz__input::placeholder {
+  color: #8e9285;
+  opacity: 1;
+}
+
+.settings-biz__help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #474c33;
+}
+
+.settings-biz__note {
+  min-width: 0;
+}
+
+.settings-biz__note.is-error {
+  color: #8a3a2c;
+}
+
+.settings-biz__count {
+  flex: none;
+  white-space: nowrap;
+
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-biz__count.is-warn {
+  color: #7a5223;
+}
+
+.settings-biz__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.settings-biz__save {
+  border: 0;
+  background: #14150f;
+  color: #ffffff;
+
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 24px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.settings-biz__save:hover {
+  background: #2a2c22;
+}
+
+.settings-biz__save:active {
+  transform: scale(0.98);
+}
+
+.settings-biz__save.is-disabled {
+  background: rgba(20, 21, 15, 0.32);
+  cursor: not-allowed;
+}
+
+.settings-biz__save.is-disabled:hover {
+  background: rgba(20, 21, 15, 0.32);
+}
+
+.settings-biz__save.is-disabled:active {
+  transform: none;
+}
+
+.settings-biz__save.is-saving {
+  animation: settings-breathe 1.2s ease-in-out infinite;
+}
+
+.settings-biz__cancel {
+  border: 1px solid rgba(20, 21, 15, 0.22);
+  background: transparent;
+  color: #14150f;
+
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 18px;
+
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: border-color 180ms ease;
+}
+
+.settings-biz__cancel:hover {
+  border-color: #14150f;
+}
+
+.settings-biz__cancel.is-disabled {
+  color: rgba(20, 21, 15, 0.38);
+  cursor: not-allowed;
+}
+
+.settings-biz__cancel.is-disabled:hover {
+  border-color: rgba(20, 21, 15, 0.22);
+}

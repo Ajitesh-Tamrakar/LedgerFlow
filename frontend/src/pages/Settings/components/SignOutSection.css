@@ -1,0 +1,44 @@
+/* The sign-out strip (grey). settings-rise lives in Settings.css. */
+
+.settings-signout {
+  background: #f3f3ed;
+  border: 1px solid #e2e2da;
+  border-radius: 24px;
+  padding: 18px 22px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+
+  animation-delay: 180ms;
+}
+
+.settings-signout__button {
+  flex: none;
+
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 24px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: border-color 180ms ease, background 180ms ease,
+    transform 140ms ease;
+}
+
+.settings-signout__button:hover {
+  border-color: #14150f;
+  background: #fafaf6;
+}
+
+.settings-signout__button:active {
+  transform: scale(0.98);
+}

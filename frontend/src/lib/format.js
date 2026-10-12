@@ -142,6 +142,46 @@ export function formatMb(bytes) {
 }
 
 /*
+ * The settings rail's "Member since Feb 2024" line: the month and year
+ * of an API date or datetime ("2024-02-11T09:30:00Z" -> "Feb 2024").
+ * Non-ISO input reads "" so the caller can drop the line.
+ */
+export function monthYear(iso) {
+    const parts = String(iso || "").split("-");
+
+    if (
+        parts.length < 2 ||
+        !/^[0-9]+$/.test(parts[0]) ||
+        !/^[0-9]{2}$/.test(parts[1])
+    ) {
+        return "";
+    }
+
+    const month = Number(parts[1]);
+
+    if (month < 1 || month > 12) {
+        return "";
+    }
+
+    return `${MONTHS[month - 1]} ${parts[0]}`;
+}
+
+/*
+ * Avatar initials from a name: "Sharma Paper & Board" -> "SP".
+ * Reads the first letter of the first two words; an empty name reads "—".
+ */
+export function initials(name) {
+    return (
+        String(name || "")
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((word) => word[0].toUpperCase())
+            .join("") || "—"
+    );
+}
+
+/*
  * Percent with an explicit sign, e.g. 25 -> "+25.0%", -12.34 -> "−12.3%".
  * The design uses a typographic minus, and the API sends null when there
  * is no baseline to compare against -- that reads as "—".

@@ -4,11 +4,13 @@ from django.urls import path
 from accountancy.auth_views import (
     PasswordResetConfirmView,
     PasswordResetRequestView,
+    PasswordResetVerifyView,
     VerifyEmailCodeView,
 )
 
 urlpatterns = [
     path('verify-email/', VerifyEmailCodeView.as_view(), name='otp_verify_email'),
     path('password/request/', PasswordResetRequestView.as_view(), name='otp_password_request'),
+    path('password/verify/', PasswordResetVerifyView.as_view(), name='otp_password_verify'),
     path('password/confirm/', PasswordResetConfirmView.as_view(), name='otp_password_confirm'),
 ]

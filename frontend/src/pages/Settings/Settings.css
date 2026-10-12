@@ -1,0 +1,466 @@
+/*
+ * The settings page: a 260px rail beside a single-column main, the
+ * design's palette on the app's global ground (index.css).
+ *
+ * The keyframes below are shared by the cards, whose own styles live in
+ * their files -- keyframes are global, so each file animates off these.
+ */
+
+@keyframes settings-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settings-field-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settings-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A/B twins on purpose: the parity of a counter picks the name, and a
+   class change is what replays a keyframe without a remount (a remount
+   would drop the input's focus). */
+@keyframes settings-pop-a {
+  from {
+    opacity: 0.4;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settings-pop-b {
+  from {
+    opacity: 0.4;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.settings-pop-a {
+  animation: settings-pop-a 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.settings-pop-b {
+  animation: settings-pop-b 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* 420ms twins -- the design's shake timing for fields. */
+@keyframes settings-shake-a {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes settings-shake-b {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+.settings-shake-a {
+  animation: settings-shake-a 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.settings-shake-b {
+  animation: settings-shake-b 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes settings-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes settings-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes settings-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- layout ---- */
+
+.settings__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.settings__shell {
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.settings__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.settings__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 2px 2px 0;
+}
+
+.settings__title {
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.settings__header p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5c6055;
+}
+
+/* The card base; each card file adds its own background and delay. */
+.settings-card {
+  border-radius: 24px;
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  animation: settings-rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.settings-card__title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.settings-signout {
+  animation: settings-rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---- loading / recovery ---- */
+
+.settings__loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 24px;
+  padding: 22px;
+
+  font-size: 14px;
+  color: #5c6055;
+
+  animation: settings-rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.settings__loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #14150f;
+  flex: none;
+
+  animation: settings-breathe 1.2s ease-in-out infinite;
+}
+
+.settings__load-failed {
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 24px;
+  padding: 22px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+
+  font-size: 14px;
+  color: #5c6055;
+
+  animation: settings-rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.settings__load-failed button {
+  flex: none;
+
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 20px;
+
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.settings__load-failed button:hover {
+  border-color: #14150f;
+  background: #fafaf6;
+}
+
+/* ---- confirm modal ---- */
+
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.settings-modal__scrim {
+  position: absolute;
+  inset: 0;
+
+  border: 0;
+  padding: 0;
+
+  background: rgba(20, 21, 15, 0.38);
+
+  cursor: pointer;
+
+  animation: settings-scrim-in 200ms ease both;
+}
+
+.settings-modal__dialog {
+  position: relative;
+
+  width: min(430px, 100%);
+
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 26px;
+  padding: 26px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  box-shadow: 0 30px 70px rgba(20, 21, 15, 0.24);
+
+  animation: settings-dialog-in 280ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    both;
+}
+
+.settings-modal__title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-wrap: pretty;
+}
+
+.settings-modal__body {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #5c6055;
+  text-wrap: pretty;
+}
+
+.settings-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.settings-modal__confirm {
+  flex: 1 1 150px;
+
+  border: 0;
+  background: #14150f;
+  color: #ffffff;
+
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 20px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.settings-modal__confirm:hover {
+  background: #2a2c22;
+}
+
+.settings-modal__confirm:active {
+  transform: scale(0.98);
+}
+
+.settings-modal__confirm.is-disabled {
+  cursor: not-allowed;
+}
+
+.settings-modal__confirm.is-disabled:active {
+  transform: none;
+}
+
+.settings-modal__confirm.is-busy {
+  animation: settings-breathe 1.2s ease-in-out infinite;
+}
+
+.settings-modal__cancel {
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 18px;
+
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: border-color 180ms ease;
+}
+
+.settings-modal__cancel:hover {
+  border-color: #14150f;
+}
+
+.settings-modal__help {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #6b6f64;
+}
+
+.settings-modal__help a {
+  color: #14150f;
+}
+
+/* ---- narrow screens: the rail stacks above the main column ---- */
+
+@media (max-width: 900px) {
+  .settings__shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-rail,
+  .settings-card,
+  .settings-signout,
+  .settings__loading,
+  .settings__load-failed,
+  .settings-pw__col,
+  .settings-pw__done,
+  .settings-modal__scrim,
+  .settings-modal__dialog,
+  .settings-pop-a,
+  .settings-pop-b,
+  .settings-shake-a,
+  .settings-shake-b,
+  .settings-biz__save.is-saving,
+  .settings-pw__submit.is-saving,
+  .settings-otp__verify.is-busy,
+  .settings-modal__confirm.is-busy,
+  .settings__loading-dot {
+    animation-duration: 0.001ms;
+    animation-delay: 0ms;
+    animation-iteration-count: 1;
+  }
+
+  .settings-pw__dim,
+  .settings-pw__meter-fill {
+    transition-duration: 0.001ms;
+  }
+}

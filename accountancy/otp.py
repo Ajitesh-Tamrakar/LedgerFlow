@@ -7,6 +7,7 @@ Public surface:
     generate_code()                     -> str
     issue(email, purpose, *, enforce_cooldown=False) -> str   (plaintext, for the email)
     verify(email, purpose, code)        -> None   (raises OTPError on any failure)
+    check(email, purpose, code)         -> None   (like verify, but does not consume)
     send_code_email(email, code, purpose) -> None
 """
 import hashlib
@@ -82,36 +83,76 @@ def issue(email: str, purpose: str, *, enforce_cooldown: bool = False) -> str:
     return code
 
 
-def verify(email: str, purpose: str, code: str) -> None:
-    """Consume the latest live code for (email, purpose). Raise OTPError otherwise."""
-    now = timezone.now()
-    otp = (
+def _latest_live(email: str, purpose: str):
+    """The newest unconsumed code for (email, purpose), or None."""
+    return (
         OTPCode.objects.filter(
             email=email, purpose=purpose, consumed_at__isnull=True
         )
         .order_by('-created_at')
         .first()
     )
-    if otp is None:
-        raise OTPError('No active code. Request a new one.')
+
+
+def _gate(otp, now) -> str | None:
+    """The pre-compare checks verify() and check() both need.
+
+    Returns an OTPError message to raise, or None when the code may be
+    compared. A locked-out code is consumed here so it cannot be retried;
+    the expired and no-code cases are reported the same way by both."""
     if otp.expires_at <= now:
-        raise OTPError('Code expired. Request a new one.')
+        return 'Code expired. Request a new one.'
     if otp.attempt_count >= MAX_ATTEMPTS:
         otp.consumed_at = now
         otp.save(update_fields=['consumed_at'])
-        raise OTPError('Too many attempts. Request a new one.')
+        return 'Too many attempts. Request a new one.'
+    return None
 
+
+def _note_bad_attempt(otp, now) -> None:
+    """Count a failed comparison; lock the code out at the cap."""
+    otp.attempt_count += 1
+    if otp.attempt_count >= MAX_ATTEMPTS:
+        otp.consumed_at = now
+        otp.save(update_fields=['attempt_count', 'consumed_at'])
+    else:
+        otp.save(update_fields=['attempt_count'])
+
+
+def verify(email: str, purpose: str, code: str) -> None:
+    """Consume the latest live code for (email, purpose). Raise OTPError otherwise."""
+    now = timezone.now()
+    otp = _latest_live(email, purpose)
+    if otp is None:
+        raise OTPError('No active code. Request a new one.')
+    gate = _gate(otp, now)
+    if gate is not None:
+        raise OTPError(gate)
     if not hmac.compare_digest(otp.code_hash, hash_code(code)):
-        otp.attempt_count += 1
-        if otp.attempt_count >= MAX_ATTEMPTS:
-            otp.consumed_at = now
-            otp.save(update_fields=['attempt_count', 'consumed_at'])
-        else:
-            otp.save(update_fields=['attempt_count'])
+        _note_bad_attempt(otp, now)
         raise OTPError('Incorrect code.')
 
     otp.consumed_at = now
     otp.save(update_fields=['consumed_at'])
+
+
+def check(email: str, purpose: str, code: str) -> None:
+    """Compare the latest live code WITHOUT consuming it. Raise OTPError otherwise.
+
+    The settings page verifies a reset code before unlocking the new-password
+    fields, then confirms with the SAME code -- so this gate must leave the
+    code live for the confirm step. Everything else matches verify() exactly:
+    the same messages, the same failed-attempt count, the same lockout."""
+    now = timezone.now()
+    otp = _latest_live(email, purpose)
+    if otp is None:
+        raise OTPError('No active code. Request a new one.')
+    gate = _gate(otp, now)
+    if gate is not None:
+        raise OTPError(gate)
+    if not hmac.compare_digest(otp.code_hash, hash_code(code)):
+        _note_bad_attempt(otp, now)
+        raise OTPError('Incorrect code.')
 
 
 def send_code_email(email: str, code: str, purpose: str) -> None:

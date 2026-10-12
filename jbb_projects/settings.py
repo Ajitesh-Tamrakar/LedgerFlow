@@ -162,6 +162,12 @@ REST_AUTH = {
     "SESSION_LOGIN": False,
     "REGISTER_SERIALIZER": "accountancy.serializers.CustomRegisterSerializer",
     "USER_DETAILS_SERIALIZER": "accountancy.serializers.CustomUserDetailsSerializer",  # nests `business`
+    # dj-rest-auth's default is False, and with it off the serializer
+    # POPS the old_password field -- the change then went through without
+    # checking the current password at all (any live JWT could reset it).
+    # The settings page treats the current password as the real gate, so
+    # enable it explicitly.
+    "OLD_PASSWORD_FIELD_ENABLED": True,
     "TOKEN_MODEL": None,  # JWT-only; not using DRF's legacy authtoken model
     "JWT_AUTH_HTTPONLY": True, 
     "JWT_AUTH_REFRESH_COOKIE":'ledgerflow_refresh'
