@@ -1,4 +1,4 @@
-import { apiRequest } from "./auth";
+import { apiRequest, API_BASE_URL } from "./auth";
 
 /*
  * Cashbook entries are addressed by date (one row per day, per the
@@ -47,4 +47,36 @@ export async function getCashbookEntries({ dateFrom, dateTo } = {}) {
     const query = params.toString();
 
     return apiRequest(`/cashbook/${query ? `?${query}` : ""}`);
+}
+
+
+// The list, every page. `getCashbookEntries` above is a single page --
+// fine for a month's calendar dots (31 rows max, the page size is 50).
+// The cashbook page's custom range can be 120 days wide, so this one
+// follows `next` until it is null and hands back the merged rows.
+export async function getCashbookEntriesAll({ dateFrom, dateTo } = {}) {
+    const params = new URLSearchParams();
+
+    if (dateFrom) {
+        params.set("date_from", dateFrom);
+    }
+
+    if (dateTo) {
+        params.set("date_to", dateTo);
+    }
+
+    const query = params.toString();
+    // `next` is an absolute URL; apiRequest expects a path off its base,
+    // so hand it back the part after the base.
+    let endpoint = `/cashbook/${query ? `?${query}` : ""}`;
+
+    const rows = [];
+
+    while (endpoint) {
+        const data = await apiRequest(endpoint);
+        rows.push(...data.results);
+        endpoint = data.next ? data.next.slice(API_BASE_URL.length) : "";
+    }
+
+    return rows;
 }

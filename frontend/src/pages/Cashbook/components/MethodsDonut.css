@@ -1,0 +1,115 @@
+.methods__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.methods__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.methods__range {
+  font-size: 11.5px;
+  color: #6B6F64;
+  white-space: nowrap;
+}
+
+.methods__donut {
+  position: relative;
+  align-self: center;
+  width: min(200px, 100%);
+  aspect-ratio: 1 / 1;
+}
+
+.methods__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* arcs start at 12 o'clock */
+}
+
+.methods__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.methods__total {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 25px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.methods__center-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B6F64;
+}
+
+.methods__legend {
+  display: flex;
+  flex-direction: column;
+}
+
+.methods__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #F3F3EC;
+  padding: 10px 0;
+}
+
+.methods__swatch {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.methods__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12.5px;
+  color: #3A3E33;
+  white-space: nowrap;
+}
+
+.methods__amount {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.methods__pct {
+  flex: 0 0 46px;
+  text-align: right;
+  font-size: 12px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+}
+
+.methods__note {
+  margin-top: auto;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6B6F64;
+}

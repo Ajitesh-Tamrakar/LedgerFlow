@@ -348,6 +348,17 @@
   background: #D8F14B;
 }
 
+/* A deliberate-₹0 day: a ring, not a fill, so the two saved states
+   read differently (and to colour-blind eyes and greyscale prints). */
+.date-field__dot--zero {
+  background: transparent;
+  border: 1px solid #14150F;
+}
+
+.date-field__dot--zero.date-field__dot--selected {
+  border-color: #D8F14B;
+}
+
 
 /* Footer */
 
@@ -370,6 +381,21 @@
 
   font-size: 11px;
   color: #6B6F64;
+}
+
+.date-field__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  font-size: 11px;
+  color: #6B6F64;
+}
+
+.date-field__legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .date-field__saved-dot {

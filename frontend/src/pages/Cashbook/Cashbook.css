@@ -1,0 +1,93 @@
+.cashbook__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cashbook__title {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.cashbook__subtitle {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: #6B6F64;
+  max-width: 52ch;
+}
+
+.cashbook__today {
+  font-size: 12.5px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The design's bento: three columns, wide cards span two. At 900px and
+   below (the design's breakpoint) everything is one column. */
+.cashbook__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cashbook__grid > .card--wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .cashbook__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashbook__grid > .card--wide {
+    grid-column: auto;
+  }
+}
+
+/* The design's load choreography, same as the dashboard: every card
+   rises 14px into place, staggered so the bento fills in like the
+   mock. The delay is per card class because the cards mount at
+   different times as their data lands. */
+@keyframes cashbook-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cashbook__grid > .card {
+  animation: cashbook-rise 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.cashbook__grid > .daily-entry {
+  animation-delay: 0ms;
+}
+
+.cashbook__grid > .quick-status {
+  animation-delay: 60ms;
+}
+
+.cashbook__grid > .daily-chart {
+  animation-delay: 70ms;
+}
+
+.cashbook__grid > .methods {
+  animation-delay: 110ms;
+}
+
+.cashbook__grid > .recent-records {
+  animation-delay: 140ms;
+}
+
+.cashbook__grid > .selected-day {
+  animation-delay: 200ms;
+}

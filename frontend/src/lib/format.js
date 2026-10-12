@@ -26,14 +26,54 @@ export function formatInr(value) {
 }
 
 /*
- * Percent with an explicit sign, e.g. 25 -> "+25.0%", -12.34 -> "−12.3%".
- * The design uses a typographic minus, and the API sends null when there
- * is no baseline to compare against -- that reads as "—".
+ * The design's compact money reading, for figures that share space with
+ * labels (the methods donut's center): 950 -> "₹950", 12000 -> "₹12.0k",
+ * 120000 -> "₹1.2L", 15000000 -> "₹1.50Cr".
  */
+export function formatCompact(value) {
+    const v = Math.round(Number(value));
+
+    if (!Number.isFinite(v)) {
+        return "₹0";
+    }
+
+    if (v >= 10000000) {
+        return "₹" + (v / 10000000).toFixed(2) + "Cr";
+    }
+    if (v >= 100000) {
+        return "₹" + (v / 100000).toFixed(2) + "L";
+    }
+    if (v >= 1000) {
+        return "₹" + (v / 1000).toFixed(1) + "k";
+    }
+    return "₹" + v;
+}
+
 const MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/*
+ * The design's weekday reading for an API date: "2026-10-12" -> "Mon".
+ * ISO dates are midnight UTC, so the weekday reads the same in every
+ * local timezone.
+ */
+export function weekdayName(iso) {
+    const parts = String(iso || "").split("-");
+
+    if (parts.length !== 3 || parts.some((part) => !/^[0-9]+$/.test(part))) {
+        return "";
+    }
+
+    const day = new Date(
+        Date.UTC(parts[0], parts[1] - 1, parts[2])
+    ).getUTCDay();
+
+    return WEEKDAYS[day];
+}
 
 /*
  * Today in the app's ISO day format ("2026-10-10"), from the local
@@ -85,6 +125,11 @@ export function formatDay(iso) {
     }`;
 }
 
+/*
+ * Percent with an explicit sign, e.g. 25 -> "+25.0%", -12.34 -> "−12.3%".
+ * The design uses a typographic minus, and the API sends null when there
+ * is no baseline to compare against -- that reads as "—".
+ */
 export function formatPercent(value) {
     if (value === null || value === undefined || !Number.isFinite(value)) {
         return "—";

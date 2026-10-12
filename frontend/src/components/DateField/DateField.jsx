@@ -62,6 +62,18 @@ function DateField({
   value,
   onChange,
   savedDates = [],
+  // Days saved as a deliberate ₹0 (hollow dot). `null` = caller doesn't
+  // track zero-days (the dashboard), in which case the footer keeps its
+  // single "Entry saved" legend line.
+  zeroDates = null,
+  // How the trigger renders the value (the cashbook page shows
+  // "14 Sep · Wed"); defaults to the full "14 Sep 2026" reading.
+  triggerLabel = null,
+  // Which month the calendar should show. When the caller supplies it,
+  // the calendar reports navigation back via onViewMonthChange, so the
+  // caller can fetch that month's entries for the dots.
+  viewMonth: viewMonthProp = null,
+  onViewMonthChange,
   maxDate,
 }) {
   const today = maxDate || getToday();
@@ -71,6 +83,19 @@ function DateField({
   const [viewMonth, setViewMonth] = useState(
     value ? value.slice(0, 7) : today.slice(0, 7)
   );
+
+  // Controlled month: follow the caller when it changes (a new day was
+  // picked elsewhere), without fighting the user's in-calendar navigation.
+  useEffect(() => {
+    if (viewMonthProp && viewMonthProp !== viewMonth) {
+      setViewMonth(viewMonthProp);
+    }
+  }, [viewMonthProp]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function goMonth(ym) {
+    setViewMonth(ym);
+    onViewMonthChange?.(ym);
+  }
 
   useEffect(() => {
     function handleOutsideClick(event) {
@@ -104,6 +129,11 @@ function DateField({
   const savedSet = useMemo(
     () => new Set(savedDates),
     [savedDates]
+  );
+
+  const zeroSet = useMemo(
+    () => (zeroDates ? new Set(zeroDates) : null),
+    [zeroDates]
   );
 
   const calendar = useMemo(() => {
@@ -141,6 +171,7 @@ function DateField({
       const isToday = iso === today;
       const future = iso > today;
       const saved = savedSet.has(iso);
+      const zero = zeroSet ? zeroSet.has(iso) : false;
 
       cells.push({
         iso,
@@ -149,11 +180,12 @@ function DateField({
         isToday,
         future,
         saved,
+        zero,
       });
     }
 
     return cells;
-  }, [viewMonth, selectedDate, today, savedSet]);
+  }, [viewMonth, selectedDate, today, savedSet, zeroSet]);
 
   const [year, month] = viewMonth.split("-").map(Number);
 
@@ -179,7 +211,7 @@ function DateField({
 
     if (iso > today.slice(0, 7)) return;
 
-    setViewMonth(iso);
+    goMonth(iso);
     setView("days");
   }
 
@@ -207,9 +239,7 @@ function DateField({
           onClick={() => {
             setOpen((current) => !current);
             setView("days");
-            setViewMonth(
-              value ? value.slice(0, 7) : today.slice(0, 7)
-            );
+            goMonth(value ? value.slice(0, 7) : today.slice(0, 7));
           }}
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -219,7 +249,7 @@ function DateField({
           </span>
 
           <span className="date-field__trigger-value">
-            {formatDate(value)}
+            {triggerLabel ? triggerLabel(value) : formatDate(value)}
           </span>
 
           <span
@@ -243,7 +273,7 @@ function DateField({
                 type="button"
                 className="date-field__nav"
                 onClick={() =>
-                  setViewMonth(
+                  goMonth(
                     shiftMonth(
                       viewMonth,
                       monthView ? -12 : -1
@@ -295,7 +325,7 @@ function DateField({
                 disabled={atToday}
                 onClick={() => {
                   if (!atToday) {
-                    setViewMonth(
+                    goMonth(
                       shiftMonth(
                         viewMonth,
                         monthView ? 12 : 1
@@ -408,6 +438,10 @@ function DateField({
                               ? "date-field__dot--saved"
                               : ""
                           } ${
+                            cell.zero
+                              ? "date-field__dot--zero"
+                              : ""
+                          } ${
                             cell.selected
                               ? "date-field__dot--selected"
                               : ""
@@ -421,10 +455,23 @@ function DateField({
             )}
 
             <div className="date-field__footer">
-              <span className="date-field__saved-label">
-                <span className="date-field__saved-dot" />
-                Entry saved
-              </span>
+              {zeroDates ? (
+                <span className="date-field__legend">
+                  <span className="date-field__legend-row">
+                    <span className="date-field__dot date-field__dot--saved" />
+                    Recorded
+                  </span>
+                  <span className="date-field__legend-row">
+                    <span className="date-field__dot date-field__dot--zero" />
+                    Recorded as ₹0
+                  </span>
+                </span>
+              ) : (
+                <span className="date-field__saved-label">
+                  <span className="date-field__saved-dot" />
+                  Entry saved
+                </span>
+              )}
 
               <button
                 type="button"
