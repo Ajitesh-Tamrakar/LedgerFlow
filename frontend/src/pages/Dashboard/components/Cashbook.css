@@ -1,0 +1,234 @@
+/* Wide white card; gap 16 and min-height come from the design. */
+.cashbook {
+  gap: 16px;
+  min-height: 230px;
+}
+
+.cashbook__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cashbook__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.cashbook__header-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cashbook__status {
+  font-size: 12px;
+  color: #6B6F64;
+  white-space: nowrap;
+}
+
+.cashbook__back-today {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #5C6055;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cashbook__back-today:hover {
+  border-color: #14150F;
+  color: #14150F;
+}
+
+.cashbook__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.cashbook__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cashbook__field-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B6F64;
+}
+
+.cashbook__field-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #DDDDD4;
+  border-radius: 14px;
+  padding: 0 14px;
+  height: 54px;
+  background: #FAFAF6;
+}
+
+.cashbook__field-box--invalid {
+  border-color: #9B3225;
+}
+
+.cashbook__field-symbol {
+  color: #6B6F64;
+  font-size: 17px;
+}
+
+.cashbook__field-box input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: #14150F;
+}
+
+.cashbook__field-box input:focus-visible {
+  outline: none; /* the box itself shows focus */
+}
+
+.cashbook__field-box:focus-within {
+  outline: 2px solid #14150F;
+  outline-offset: 2px;
+}
+
+.cashbook__field-error {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #9B3225;
+}
+
+.cashbook__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.cashbook__total {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  padding: 0 18px;
+  height: 54px;
+  background: #14150F;
+  color: #FFFFFF;
+}
+
+.cashbook__total-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #A8AD9F;
+}
+
+.cashbook__total-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Two identical keyframes, A and B: the total moves with every
+   keystroke and the element persists, so the class must change for
+   the rise to play again. Same as the design's numA/numB. */
+.cashbook__total-value--a {
+  animation: cashbook-num-a 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.cashbook__total-value--b {
+  animation: cashbook-num-b 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes cashbook-num-a {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cashbook-num-b {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cashbook__save {
+  border: 0;
+  background: #14150F;
+  color: #FFFFFF;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.cashbook__save:not(:disabled):hover {
+  background: #2A2C22;
+}
+
+.cashbook__save:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.cashbook__save--busy {
+  animation: cashbook-breathe 1100ms ease-in-out infinite;
+}
+
+.cashbook__save--blocked {
+  background: #9A9C93;
+  cursor: not-allowed;
+}
+
+.cashbook__hint {
+  font-size: 11.5px;
+  color: #6B6F64;
+}
+
+@keyframes cashbook-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}

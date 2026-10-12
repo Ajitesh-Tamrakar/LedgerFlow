@@ -1,0 +1,180 @@
+/* White card; only spacing differs from the .card base. */
+.tasks {
+  gap: 12px;
+  min-height: 230px;
+}
+
+.tasks__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tasks__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.tasks__count {
+  font-size: 12px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+}
+
+.tasks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tasks__row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+  border-bottom: 1px solid #F3F3EC;
+}
+
+.tasks__row:hover {
+  opacity: 0.7;
+}
+
+.tasks__box {
+  width: 19px;
+  height: 19px;
+  border-radius: 7px;
+  border: 1.5px solid #C9CABF;
+  background: transparent;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #14150F;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background 180ms ease, border-color 180ms ease,
+    transform 180ms cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.tasks__row[aria-pressed="true"] .tasks__box {
+  background: #D8F14B;
+  border-color: #D8F14B;
+}
+
+.tasks__text {
+  font-size: 13.5px;
+  color: #14150F;
+}
+
+.tasks__row[aria-pressed="true"] .tasks__text {
+  color: #6B6F64;
+  text-decoration: line-through;
+}
+
+.tasks__empty {
+  border: 1px dashed #DDDDD4;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  font-size: 13px;
+  color: #6B6F64;
+  line-height: 1.55;
+}
+
+.tasks__composer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tasks__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #14150F;
+  border-radius: 14px;
+  padding: 0 8px 0 14px;
+  height: 46px;
+  background: #FAFAF6;
+}
+
+.tasks__field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 13.5px;
+  color: #14150F;
+}
+
+.tasks__add {
+  border: 0;
+  background: #14150F;
+  color: #FFFFFF;
+  border-radius: 999px;
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tasks__add:disabled {
+  background: #C9CABF;
+  cursor: not-allowed;
+}
+
+.tasks__composer-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tasks__composer-hint span {
+  font-size: 11px;
+  color: #6B6F64;
+}
+
+.tasks__cancel {
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  color: #5C6055;
+  cursor: pointer;
+  padding: 4px 2px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tasks__open {
+  border: 1px dashed #D3D3CA;
+  background: transparent;
+  border-radius: 14px;
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: #5C6055;
+  cursor: pointer;
+  width: 100%;
+}
+
+.tasks__open:hover {
+  border-color: #14150F;
+  color: #14150F;
+}

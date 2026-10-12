@@ -1,0 +1,157 @@
+/* Wide white card; the two-column span comes from Dashboard.css (.card--wide). */
+.outstanding-per-dealer {
+  gap: 14px;
+  min-height: 250px;
+}
+
+.outstanding-per-dealer__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.outstanding-per-dealer__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.outstanding-per-dealer__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.outstanding-per-dealer__credit-toggle {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #6B6F64;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.outstanding-per-dealer__credit-toggle[aria-pressed="true"] {
+  background: #F3F3ED;
+  color: #14150F;
+}
+
+.outstanding-per-dealer__all {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 4px;
+  font-size: 12.5px;
+  color: #5C6055;
+}
+
+.outstanding-per-dealer__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.outstanding-per-dealer__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid #F1F1EA;
+}
+
+.outstanding-per-dealer__rank {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: #F3F3ED;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5C6055;
+  flex: none;
+}
+
+.outstanding-per-dealer__who {
+  flex: 1;
+  min-width: 0;
+}
+
+.outstanding-per-dealer__name {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outstanding-per-dealer__gstin {
+  font-size: 11.5px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+}
+
+.outstanding-per-dealer__bar {
+  flex: 0 0 34%;
+  max-width: 180px;
+  height: 7px;
+  border-radius: 999px;
+  background: #F1F1EA;
+  overflow: hidden;
+}
+
+.outstanding-per-dealer__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #14150F;
+  transition: width 480ms cubic-bezier(0.2, 0.7, 0.2, 1), background 240ms ease;
+}
+
+.outstanding-per-dealer__bar-fill--credit {
+  background: #9B3225;
+}
+
+.outstanding-per-dealer__amount-wrap {
+  text-align: right;
+  min-width: 104px;
+}
+
+.outstanding-per-dealer__amount {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: #14150F;
+}
+
+.outstanding-per-dealer__amount--credit {
+  color: #9B3225;
+}
+
+.outstanding-per-dealer__tag {
+  font-size: 11px;
+  color: #6B6F64;
+}
+
+.outstanding-per-dealer__empty {
+  border: 1px dashed #DDDDD4;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #6B6F64;
+  line-height: 1.55;
+}

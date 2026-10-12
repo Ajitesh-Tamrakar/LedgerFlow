@@ -3,13 +3,17 @@ import { refreshAccessToken } from "./tokenRefresh";
 const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 
-async function apiRequest(endpoint, options = {}, retry = true) {
+export async function apiRequest(endpoint, options = {}, retry = true) {
     const accessToken = localStorage.getItem("access_token");
 
     const response = await fetch(
         `${API_BASE_URL}${endpoint}`,
         {
             ...options,
+
+            // let the browser send/store the HttpOnly refresh cookie
+            // (login sets it; the refresh flow depends on it)
+            credentials: "include",
 
             headers: {
                 "Content-Type": "application/json",

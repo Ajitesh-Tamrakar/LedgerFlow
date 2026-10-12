@@ -1,0 +1,56 @@
+/* Lavender card. Overrides the white .card base. */
+.purchasing-activity {
+  background: #DCD9F5;
+  border: none;
+  gap: 16px;
+  min-height: 250px;
+}
+
+.purchasing-activity__title {
+  align-self: flex-start;
+  border: 1px solid rgba(20, 21, 15, 0.2);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.purchasing-activity__caption {
+  font-size: 11.5px;
+  color: #474463;
+  font-weight: 500;
+}
+
+.purchasing-activity__figures {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.purchasing-activity__amount {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.purchasing-activity__count {
+  font-size: 12.5px;
+  color: #474463;
+}
+
+.purchasing-activity__explain {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: #3B3956;
+}

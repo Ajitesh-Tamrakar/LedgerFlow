@@ -31,6 +31,12 @@ ALLOWED_HOSTS = [getenv("APP_HOST", "localhost")]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Without this, the browser blocks cross-origin responses that carry the
+# HttpOnly refresh cookie (login would store it, refresh would read it).
+# The test client never enforces browser cookie rules, so this only shows up
+# in a real browser: token refresh works in curl but fails on the page.
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]

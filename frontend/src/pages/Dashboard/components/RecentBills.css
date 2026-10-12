@@ -1,0 +1,89 @@
+/* White card; the .card base already matches, so only spacing differs. */
+.recent-bills {
+  gap: 12px;
+  min-height: 230px;
+}
+
+.recent-bills__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.recent-bills__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.recent-bills__all {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 4px;
+  font-size: 12.5px;
+  color: #5C6055;
+}
+
+.recent-bills__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-bills__row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F3EC;
+}
+
+.recent-bills__chip {
+  width: 30px;
+  height: 36px;
+  border-radius: 7px;
+  background: #F3F3ED;
+  border: 1px solid #E6E6DE;
+  flex: none;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6B6F64;
+}
+
+.recent-bills__who {
+  flex: 1;
+  min-width: 0;
+}
+
+.recent-bills__dealer {
+  font-size: 13.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-bills__date {
+  font-size: 11.5px;
+  color: #6B6F64;
+}
+
+.recent-bills__amount {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
