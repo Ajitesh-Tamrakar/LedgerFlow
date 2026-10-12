@@ -213,6 +213,22 @@ class BillSerializer(DealerScopedMixin, serializers.ModelSerializer):
 class PaymentSerializer(DealerScopedMixin, serializers.ModelSerializer):
     dealer_name = serializers.CharField(source="dealer.name", read_only=True)  # name for lists
 
+    # The model's floor is >= 0 (data written outside the API); the API's
+    # own floor is strictly greater -- a zero-amount payment is meaningless,
+    # and the detail screen shows the rejection (the BillSerializer guard).
+    # required=True on the re-declaration: the model carries a 0.00 default
+    # that would otherwise make the field optional on create. (PATCH stays
+    # partial -- DRF relaxes `required` there -- but an amount that DOES
+    # travel must still be > 0.)
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                "Amount is required and must be greater than zero."
+            )
+        return value
+
     class Meta:
         model = Payment
         fields = ["id", "dealer", "dealer_name", "date", "amount", "method", "created_at", "updated_at"]

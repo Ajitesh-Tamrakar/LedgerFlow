@@ -713,7 +713,7 @@ class BillPurchasesAPITests(TestCase):
 
 
 class PaymentAPITests(TestCase):
-    """Payment-specific: the method enum, the /methods/ endpoint, the DB constraint."""
+    """Payment-specific: the method enum, the /methods/ endpoint, the amount floor, the DB constraint."""
 
     LIST = '/api/payments/'
 
@@ -756,6 +756,23 @@ class PaymentAPITests(TestCase):
         self.create_payment(method='cash')
         self.create_payment(method='upi')
         self.assertEqual(self.client.get(self.LIST, {'method': 'cash'}).data['count'], 2)
+
+    # --- the amount floor (mirrors the BillSerializer guard) ---
+    def test_zero_amount_rejected(self):
+        resp = self.create_payment(amount='0.00')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('amount', resp.data)
+
+    def test_negative_amount_rejected(self):
+        resp = self.create_payment(amount='-50.00')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('amount', resp.data)
+
+    def test_missing_amount_rejected(self):
+        data = {'dealer': self.dealer_a.pk, 'date': '2026-02-01', 'method': 'upi'}
+        resp = self.client.post(self.LIST, data, format='json')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('amount', resp.data)
 
     # --- DB constraint: enforced even bypassing the serializer ---
     def test_db_rejects_bad_method(self):
