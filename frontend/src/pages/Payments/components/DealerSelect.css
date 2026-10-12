@@ -1,0 +1,242 @@
+.payments-dealer-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payments-dealer-select__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b6f64;
+}
+
+.payments-dealer-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid #ddddd4;
+  background: #fafaf6;
+  border-radius: 14px;
+  height: 52px;
+  padding: 0 16px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  transition: border-color 180ms ease;
+}
+
+.payments-dealer-select__trigger:hover,
+.payments-dealer-select__trigger--open {
+  border-color: #14150f;
+}
+
+.payments-dealer-select__selected {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.payments-dealer-select__value {
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payments-dealer-select__value--empty {
+  color: #6b6f64;
+}
+
+.payments-dealer-select__retired {
+  border: 1px solid #d8cfc4;
+  background: #f3ede4;
+  color: #7a5c3e;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex: none;
+}
+
+.payments-dealer-select__caret {
+  font-size: 9px;
+  color: #6b6f64;
+  transition: transform 200ms ease;
+}
+
+.payments-dealer-select__caret--open {
+  transform: rotate(180deg);
+}
+
+@keyframes payments-dealer-select-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payments-dealer-select__menu {
+  position: absolute;
+  z-index: 30;
+  top: 84px;
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 20px 44px rgba(20, 21, 15, 0.16);
+  animation: payments-dealer-select-panel-in 190ms
+    cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  transform-origin: top left;
+}
+
+.payments-dealer-select__search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #ddddd4;
+  background: #fafaf6;
+  border-radius: 13px;
+  height: 44px;
+  padding: 0 13px;
+  margin-bottom: 8px;
+}
+
+.payments-dealer-select__search:focus-within {
+  outline: 2px solid #14150f;
+  outline-offset: 2px;
+}
+
+.payments-dealer-select__search > span {
+  font-size: 14px;
+  color: #9a9e92;
+}
+
+.payments-dealer-select__search input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-size: 13.5px;
+  color: #14150f;
+}
+
+.payments-dealer-select__search input:focus-visible {
+  outline: none;
+}
+
+.payments-dealer-select__clear {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: #f1f1ea;
+  color: #5c6055;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.payments-dealer-select__clear:hover {
+  background: #e4e4db;
+}
+
+.payments-dealer-select__search-note {
+  padding: 2px 12px 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9a9e92;
+}
+
+.payments-dealer-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #14150f;
+  border-radius: 13px;
+  min-height: 42px;
+  padding: 0 12px;
+  font-size: 13.5px;
+  font-weight: 400;
+  cursor: pointer;
+  text-align: left;
+  transition: background 160ms ease, opacity 180ms ease;
+}
+
+.payments-dealer-select__option:hover {
+  background: #f3f3ed;
+}
+
+.payments-dealer-select__option--selected {
+  background: #f3f3ed;
+  font-weight: 600;
+}
+
+.payments-dealer-select__option--dim {
+  opacity: 0.42;
+}
+
+.payments-dealer-select__option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payments-dealer-select__mark {
+  background: #e4e7c9;
+  border-radius: 4px;
+  padding: 0 1px;
+}
+
+.payments-dealer-select__tag {
+  border: 1px solid #e2e2da;
+  background: #f1f1ea;
+  color: #5c6055;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex: none;
+}
+
+.payments-dealer-select__tag--retired {
+  border-color: #d8cfc4;
+  background: #f3ede4;
+  color: #7a5c3e;
+}
+
+.payments-dealer-select__footnote {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b6f64;
+}

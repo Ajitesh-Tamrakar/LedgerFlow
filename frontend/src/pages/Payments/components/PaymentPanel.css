@@ -1,0 +1,454 @@
+/* The side panel: a scrim over the page and a right-hand drawer. The
+   first fixed drawer in the app -- the design's one-screen payments
+   layout opens adding and correcting in the same panel. */
+.payments-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+@keyframes payments-panel-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.payments-panel__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(20, 21, 15, 0.38);
+  cursor: pointer;
+  animation: payments-panel-scrim-in 200ms ease both;
+}
+
+@keyframes payments-panel-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(34px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payments-panel__drawer {
+  position: relative;
+  width: min(460px, 100%);
+  margin: 14px;
+  align-self: stretch;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #e2e2da;
+  border-radius: 26px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 30px 70px rgba(20, 21, 15, 0.24);
+  animation: payments-panel-drawer-in 300ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    both;
+}
+
+@media (max-width: 560px) {
+  .payments-panel__drawer {
+    width: 100%;
+    border-radius: 26px 26px 0 0;
+  }
+}
+
+/* The drawer's fields rise in, staggered (the design's fieldIn). */
+@keyframes payments-panel-field-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payments-panel__preview {
+  background: #e4e7c9;
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: payments-panel-field-in 340ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    both;
+}
+
+.payments-panel__dealer {
+  animation: payments-panel-field-in 340ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    40ms both;
+}
+
+.payments-panel__fields {
+  animation: payments-panel-field-in 340ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    80ms both;
+}
+
+.payments-panel__methods {
+  animation: payments-panel-field-in 340ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    120ms both;
+}
+
+.payments-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.payments-panel__title {
+  margin: 0;
+  border: 1px solid #ddddd4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5c6055;
+  white-space: nowrap;
+}
+
+.payments-panel__close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e6e6de;
+  background: #ffffff;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #5c6055;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.payments-panel__close:hover {
+  border-color: #14150f;
+  color: #14150f;
+}
+
+/* (the preview's entrance is declared with its layout above) */
+
+.payments-panel__preview-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #474c33;
+}
+
+.payments-panel__preview-amount {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(30px, 4vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+.payments-panel__preview-amount--a {
+  animation: payments-panel-pop-a 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.payments-panel__preview-amount--b {
+  animation: payments-panel-pop-b 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes payments-panel-pop-a {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes payments-panel-pop-b {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payments-panel__preview-note {
+  font-size: 12px;
+  color: #474c33;
+}
+
+.payments-panel__dealer {
+  position: relative;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payments-panel__picker-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b6f64;
+}
+
+.payments-panel__fields {
+  position: relative;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.payments-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payments-panel__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b6f64;
+}
+
+.payments-panel__amount-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ddddd4;
+  border-radius: 14px;
+  padding: 0 14px;
+  height: 52px;
+  background: #fafaf6;
+  transition: border-color 180ms ease;
+}
+
+.payments-panel__amount-box:focus-within {
+  outline: 2px solid #14150f;
+  outline-offset: 2px;
+}
+
+.payments-panel__amount-box input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  color: #14150f;
+}
+
+.payments-panel__amount-box input:focus-visible {
+  outline: none;
+}
+
+.payments-panel__amount-box--invalid {
+  border-color: #8a3a2c;
+}
+
+.payments-panel__hint {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b6f64;
+  margin-top: -4px;
+}
+
+.payments-panel__hint--warn {
+  color: #8a3a2c;
+}
+
+.payments-panel__methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payments-panel__method-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payments-panel__method {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e6e6de;
+  background: #ffffff;
+  color: #5c6055;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease,
+    color 180ms ease;
+}
+
+.payments-panel__method:hover {
+  border-color: #14150f;
+}
+
+.payments-panel__method:active {
+  transform: scale(0.97);
+}
+
+.payments-panel__method-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: none;
+  transition: background 180ms ease;
+}
+
+.payments-panel__method-note {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b6f64;
+}
+
+.payments-panel__error {
+  background: #fbefec;
+  border: 1px solid #e3c8c0;
+  border-radius: 16px;
+  padding: 13px 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #7a2418;
+  animation: payments-panel-flash-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    both;
+}
+
+@keyframes payments-panel-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.payments-panel__recorded {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid #f1f1ea;
+  padding-top: 12px;
+  font-size: 11.5px;
+  color: #6b6f64;
+}
+
+.payments-panel__recorded > span:last-child {
+  font-variant-numeric: tabular-nums;
+  color: #14150f;
+}
+
+.payments-panel__footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.payments-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@keyframes payments-panel-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.payments-panel__save {
+  flex: 1 1 170px;
+  border: 0;
+  background: #14150f;
+  color: #ffffff;
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.payments-panel__save:hover:not(:disabled) {
+  background: #2a2c22;
+}
+
+.payments-panel__save:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.payments-panel__save--off {
+  background: #b4b8ac;
+  cursor: not-allowed;
+}
+
+.payments-panel__save--busy {
+  animation: payments-panel-breathe 1.2s ease-in-out infinite;
+  cursor: wait;
+}
+
+.payments-panel__secondary {
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.payments-panel__secondary:hover:not(:disabled) {
+  border-color: #14150f;
+}
+
+.payments-panel__secondary--off {
+  color: #b4b8ac;
+  cursor: not-allowed;
+}
+
+.payments-panel__foot {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b6f64;
+}
