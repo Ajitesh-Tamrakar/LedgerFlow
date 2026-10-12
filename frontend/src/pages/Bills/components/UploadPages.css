@@ -1,0 +1,438 @@
+.upload-pages {
+  gap: 16px;
+  min-height: 380px;
+}
+
+.upload-pages__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.upload-pages__title {
+  margin: 0;
+  border: 1px solid #ddddd4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5c6055;
+  white-space: nowrap;
+}
+
+.upload-pages__count {
+  font-size: 12px;
+  color: #6b6f64;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes upload-pages-pop-a {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes upload-pages-pop-b {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.upload-pages__count--a {
+  animation: upload-pages-pop-a 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.upload-pages__count--b {
+  animation: upload-pages-pop-b 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.upload-pages__drop {
+  border: 1.5px dashed #ddddd4;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.upload-pages__drop--active {
+  border-color: #14150f;
+  background: #f3f3ed;
+}
+
+.upload-pages__icon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 14px;
+  border: 1px solid #e2e2da;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: #5c6055;
+}
+
+.upload-pages__drop-text {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.upload-pages__drop-text > span:first-child {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-pages__drop-sub {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b6f64;
+}
+
+.upload-pages__browse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.upload-pages__browse-photos {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: #14150f;
+  color: #ffffff;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.upload-pages__browse-photos:hover {
+  background: #2a2c22;
+}
+
+.upload-pages__browse-photos:active {
+  transform: scale(0.97);
+}
+
+.upload-pages__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #e4e7c9;
+}
+
+.upload-pages__browse-pdf {
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+  border-radius: 999px;
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upload-pages__browse-pdf:hover {
+  border-color: #14150f;
+}
+
+.upload-pages__browse-pdf:active {
+  transform: scale(0.97);
+}
+
+.upload-pages__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upload-pages__rejected {
+  background: #fbefec;
+  border: 1px solid #e3c8c0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #7a2418;
+  animation: upload-pages-flash-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.upload-pages__pdf {
+  border: 1px solid #e6e6de;
+  background: #fafaf6;
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  animation: upload-pages-thumb-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1)
+    both;
+}
+
+.upload-pages__pdf-glyph {
+  width: 44px;
+  height: 52px;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid #e6e6de;
+  background: repeating-linear-gradient(135deg, #e9e9e1 0 7px, #f4f4ee 7px 14px);
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  color: #5c6055;
+}
+
+.upload-pages__pdf-text {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.upload-pages__pdf-name {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-pages__pdf-meta {
+  font-size: 11.5px;
+  color: #6b6f64;
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-pages__remove {
+  border: 1px solid #e3d2ce;
+  background: #ffffff;
+  color: #8a3a2c;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upload-pages__remove:hover {
+  border-color: #8a3a2c;
+}
+
+.upload-pages__photos-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-pages__photos-row > span {
+  font-size: 11.5px;
+  color: #6b6f64;
+}
+
+.upload-pages__start-over {
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #5c6055;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.upload-pages__start-over:hover {
+  border-color: #14150f;
+  color: #14150f;
+}
+
+.upload-pages__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+  gap: 12px;
+}
+
+@keyframes upload-pages-thumb-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.upload-pages__photo {
+  border: 1px solid #e6e6de;
+  background: #fafaf6;
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  animation: upload-pages-thumb-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* The striped placeholder is the fallback; the real preview sits over
+   it and hides itself if the file won't render. */
+.upload-pages__thumb {
+  position: relative;
+  height: 104px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: repeating-linear-gradient(135deg, #e9e9e1 0 7px, #f4f4ee 7px 14px);
+}
+
+.upload-pages__thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.upload-pages__page-chip {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(20, 21, 15, 0.82);
+  color: #f6f7f2;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.upload-pages__photo-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: #6b6f64;
+}
+
+.upload-pages__photo-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-pages__photo-size {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-pages__photo-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.upload-pages__move {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e6e6de;
+  background: #ffffff;
+  border-radius: 11px;
+  font-size: 13px;
+  color: #14150f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.upload-pages__move:hover {
+  border-color: #14150f;
+}
+
+.upload-pages__move:disabled {
+  color: #c2c6ba;
+  cursor: not-allowed;
+}
+
+.upload-pages__move:disabled:hover {
+  border-color: #e6e6de;
+}
+
+.upload-pages__photo-controls .upload-pages__remove {
+  margin-left: auto;
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.upload-pages__none {
+  border: 1px dashed #ddddd4;
+  border-radius: 18px;
+  padding: 34px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #6b6f64;
+  animation: upload-pages-flash-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.upload-pages__note {
+  margin: auto 0 0;
+  border-top: 1px solid #f1f1ea;
+  padding-top: 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b6f64;
+}
+
+@keyframes upload-pages-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

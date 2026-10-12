@@ -39,6 +39,11 @@ class Dealer(models.Model):
 
 class Bill(models.Model):
     image = models.FileField(upload_to='bill_images')
+    # Page count of the stored PDF. Set when the PDF is compiled from photo
+    # pages at upload (the count is known then); null when a PDF is dropped
+    # in as-is, which the server can't open to count (no PDF reader -- that
+    # would be a new dependency).
+    pages = models.PositiveIntegerField(null=True, blank=True)
     date = models.DateField()
     dealer = models.ForeignKey(Dealer, on_delete=models.PROTECT)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)

@@ -1,0 +1,31 @@
+/* The design's light grey band; the local class overrides the card
+   base (a wrapping row, not the base's column). */
+.detail-notes {
+  background: #f3f3ed;
+  padding: 20px 22px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.detail-notes__item {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-notes__title {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b6f64;
+}
+
+.detail-notes__text {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #3a3e2f;
+}

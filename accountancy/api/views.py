@@ -15,8 +15,9 @@ from rest_framework.response import Response
 from accountancy.api.base import BusinessScopedMixin, BusinessScopedViewSet
 from accountancy.api.filters import BillFilter, CashbookFilter, DealerFilter, PaymentFilter
 from accountancy.api.serializers import (
-    BillSerializer, BusinessSerializer, CashbookSerializer, CollectionTrendSerializer,
-    DashboardSummarySerializer, DealerSerializer, PaymentSerializer, TaskSerializer,
+    BillPurchasesSerializer, BillSerializer, BusinessSerializer, CashbookSerializer,
+    CollectionTrendSerializer, DashboardSummarySerializer, DealerSerializer,
+    PaymentSerializer, TaskSerializer,
 )
 from accountancy.models import Bill, Cashbook, Dealer, Payment, Task
 
@@ -115,6 +116,17 @@ class BillViewSet(BusinessScopedViewSet):
             filename=f"bill-{bill.date}.pdf",
             content_type="application/pdf",
         )
+
+    def perform_update(self, serializer):
+        """Replacing the file means the old PDF is gone. Django does not
+        remove a file field's previous file on its own -- remember the old
+        name, save, then delete it if the path actually changed (a same-name
+        re-upload overwrote in place, so deleting would nuke the new file)."""
+        old_name = serializer.instance.image.name if serializer.instance.image else None
+        super().perform_update(serializer)
+        new_name = serializer.instance.image.name if serializer.instance.image else None
+        if old_name and old_name != new_name:
+            serializer.instance.image.storage.delete(old_name)
 
 
 class PaymentViewSet(BusinessScopedViewSet):
@@ -409,5 +421,63 @@ class DashboardSummaryView(BusinessScopedMixin, GenericAPIView):
                 "credit": sum((row["balance"] for row in balances if row["balance"] < zero), zero),
                 "dealers": balances,
             },
+        }
+        return Response(self.get_serializer(data).data)
+
+
+class BillPurchasesView(BusinessScopedMixin, GenericAPIView):
+    """GET /api/bills/purchases/?period=week|month|quarter
+
+    The Bills page's "Purchases this month" headline and its per-dealer
+    breakdown, in one computed document. Same family as CollectionTrendView
+    and DashboardSummaryView: the mixin for auth + scoping, a plain class
+    view on a path() -- a summary, not a model row, so nothing for the
+    router to route.
+
+    One grouped SUM per dealer over the calendar period. Never derived from
+    the paginated list: the list is the raw records (and the page's filters
+    and paging narrow what a browser would see); this is the number.
+    """
+
+    serializer_class = BillPurchasesSerializer
+    http_method_names = ["get", "head", "options"]
+    PERIODS = ("week", "month", "quarter")
+
+    def get(self, request):
+        period = request.query_params.get("period", "month").lower()
+        if period not in self.PERIODS:
+            raise ValidationError({"period": f"Choose from: {', '.join(self.PERIODS)}."})
+
+        start, end, label = _period_bounds(period, timezone.localdate())
+        zero = Decimal("0.00")
+
+        bills = Bill.objects.filter(
+            business=self.business, date__gte=start, date__lte=end
+        )
+        by_dealer = list(
+            bills.values("dealer_id")
+            .annotate(total=Sum("amount"))
+            .order_by("-total", "dealer_id")
+        )
+        names = {
+            dealer.id: dealer.name
+            for dealer in Dealer.objects.filter(id__in=[row["dealer_id"] for row in by_dealer])
+        }
+
+        data = {
+            "period": period,
+            "label": label,
+            "start": start,
+            "end": end,
+            "total": sum((row["total"] or zero for row in by_dealer), zero),
+            "count": bills.count(),
+            "dealers": [
+                {
+                    "id": row["dealer_id"],
+                    "name": names.get(row["dealer_id"], "No such dealer"),
+                    "total": row["total"] or zero,
+                }
+                for row in by_dealer
+            ],
         }
         return Response(self.get_serializer(data).data)

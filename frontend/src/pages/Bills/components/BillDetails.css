@@ -1,0 +1,94 @@
+/* The design's accent is the pale lime, so the local class overrides the
+   card base; the z-index keeps the picker menu over the actions card. */
+.bill-details {
+  background: #e4e7c9;
+  border: none;
+  min-height: 380px;
+  position: relative;
+  z-index: 20;
+}
+
+.bill-details__title {
+  margin: 0;
+  align-self: flex-start;
+  border: 1px solid rgba(20, 21, 15, 0.25);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bill-details__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.bill-details__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bill-details__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #474c33;
+}
+
+.bill-details__box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(20, 21, 15, 0.2);
+  border-radius: 14px;
+  padding: 0 14px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.78);
+  transition: border-color 180ms ease;
+}
+
+.bill-details__box--invalid {
+  border-color: #8a3a2c;
+}
+
+.bill-details__box:focus-within {
+  outline: 2px solid #14150f;
+  outline-offset: 2px;
+}
+
+.bill-details__box input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+  color: #14150f;
+}
+
+.bill-details__box input:focus-visible {
+  outline: none;
+}
+
+.bill-details__box--amount input {
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.bill-details__symbol {
+  color: #5c6055;
+  font-size: 16px;
+}
+
+.bill-details__amount-note {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #474c33;
+  margin-top: -4px;
+}

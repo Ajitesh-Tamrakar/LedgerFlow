@@ -1,0 +1,46 @@
+.upload-cta {
+  min-height: 210px;
+}
+
+.upload-cta__title {
+  margin: 0;
+  align-self: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c8ccc0;
+  white-space: nowrap;
+}
+
+.upload-cta__text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #a8ad9f;
+}
+
+.upload-cta__button {
+  margin-top: auto;
+  border: 0;
+  background: #ffffff;
+  color: #14150f;
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.upload-cta__button:hover {
+  background: #e4e7c9;
+}
+
+.upload-cta__button:active {
+  transform: scale(0.98);
+}

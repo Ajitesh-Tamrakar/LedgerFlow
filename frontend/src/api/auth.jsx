@@ -6,6 +6,15 @@ export const API_BASE_URL = "http://127.0.0.1:8000/api";
 export async function apiRequest(endpoint, options = {}, retry = true) {
     const accessToken = localStorage.getItem("access_token");
 
+    // A FormData body is a multipart upload: the BROWSER must set the
+    // Content-Type itself, because it only knows the boundary string.
+    // Stamping "application/json" on one would break the parse, so the
+    // JSON header is omitted for FormData bodies only -- every existing
+    // JSON caller is byte-identical to before.
+    const isFormData =
+        typeof FormData !== "undefined" &&
+        options.body instanceof FormData;
+
     const response = await fetch(
         `${API_BASE_URL}${endpoint}`,
         {
@@ -16,7 +25,11 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
             credentials: "include",
 
             headers: {
-                "Content-Type": "application/json",
+                ...(isFormData
+                    ? {}
+                    : {
+                        "Content-Type": "application/json",
+                    }),
 
                 ...(accessToken
                     ? {
@@ -29,9 +42,15 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         }
     );
 
-    const data = await response
-        .json()
-        .catch(() => ({}));
+    // `raw: true` hands back the Response itself instead of the parsed JSON
+    // (the bill PDF viewer needs the bytes). It skips the .json() read --
+    // reading the body would consume the stream -- and everything below
+    // (the token refresh-retry) runs unchanged.
+    const data = options.raw
+        ? {}
+        : await response
+            .json()
+            .catch(() => ({}));
 
 
     // Access token expired
@@ -55,6 +74,10 @@ export async function apiRequest(endpoint, options = {}, retry = true) {
         }
     }
 
+
+    if (options.raw) {
+        return response;
+    }
 
     if (!response.ok) {
         throw {

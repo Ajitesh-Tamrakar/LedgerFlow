@@ -1,0 +1,138 @@
+/* The picker's floating menu must sit over the list card below, so the
+   card keeps the design's own stacking. */
+.bills-filter {
+  position: relative;
+  z-index: 20;
+}
+
+.bills-filter__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bills-filter__title {
+  margin: 0;
+  border: 1px solid #ddddd4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5c6055;
+  white-space: nowrap;
+}
+
+.bills-filter__hint {
+  font-size: 12px;
+  color: #6b6f64;
+}
+
+.bills-filter__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.bills-filter__picker {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.bills-filter__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bills-filter__group--sort {
+  margin-left: auto;
+}
+
+.bills-filter__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b6f64;
+}
+
+.bills-filter__ranges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: #f3f3ed;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.bills-filter__range {
+  border: 0;
+  background: transparent;
+  color: #5c6055;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.bills-filter__range--on {
+  background: #14150f;
+  color: #ffffff;
+}
+
+.bills-filter__sorts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bills-filter__sort {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e6e6de;
+  background: #ffffff;
+  color: #5c6055;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 180ms ease, border-color 180ms ease,
+    color 180ms ease;
+}
+
+.bills-filter__sort:hover {
+  border-color: #14150f;
+}
+
+.bills-filter__sort--on {
+  border-color: #14150f;
+  background: #14150f;
+  color: #ffffff;
+}
+
+.bills-filter__arrow {
+  font-size: 9px;
+  opacity: 0.3;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.bills-filter__arrow--on {
+  opacity: 0.85;
+}
+
+.bills-filter__arrow--asc {
+  transform: rotate(180deg);
+}

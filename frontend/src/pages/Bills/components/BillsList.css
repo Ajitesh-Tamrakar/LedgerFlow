@@ -1,0 +1,396 @@
+.bills-list {
+  gap: 12px;
+  min-height: 420px;
+}
+
+.bills-list__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bills-list__title {
+  margin: 0;
+  border: 1px solid #ddddd4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5c6055;
+  white-space: nowrap;
+}
+
+/* The design's result-count pop, re-fired off `tick`'s parity (the A/B
+   keyframe trick the dealers cards use). */
+.bills-list__count {
+  font-size: 12px;
+  color: #6b6f64;
+  font-variant-numeric: tabular-nums;
+}
+
+.bills-list__count--a {
+  animation: bills-list-pop-a 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.bills-list__count--b {
+  animation: bills-list-pop-b 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes bills-list-pop-a {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bills-list-pop-b {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bills-list__flash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: #f3f3ed;
+  border: 1px solid #e2e2da;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 13px;
+  animation: bills-list-flash-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.bills-list__flash > span {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #14150f;
+}
+
+.bills-list__table {
+  display: flex;
+  flex-direction: column;
+}
+
+.bills-list__cols {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid #ecece4;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a9e92;
+}
+
+.bills-list__col-dealer {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+.bills-list__col-date {
+  flex: 0 0 120px;
+}
+
+.bills-list__col-amount {
+  flex: 0 0 130px;
+  text-align: right;
+}
+
+.bills-list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-bottom: 1px solid #f3f3ec;
+  border-radius: 12px;
+  background: transparent;
+  text-align: left;
+  padding: 12px 4px;
+  min-height: 44px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: background 180ms ease;
+}
+
+.bills-list__row:hover {
+  background: #fafaf6;
+}
+
+/* Two identical keyframes, A and B: `gen` flips the class so the
+   stagger replays (the design's rowA/rowB). */
+.bills-list__row--a {
+  animation: bills-list-row-a 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.bills-list__row--b {
+  animation: bills-list-row-b 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes bills-list-row-a {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bills-list-row-b {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bills-list__id {
+  flex: 1 1 120px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bills-list__chip {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #f1f1ea;
+  color: #5c6055;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 1px solid #e6e6de;
+}
+
+.bills-list__text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bills-list__name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bills-list__name {
+  font-size: 14.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bills-list__retired {
+  border: 1px solid #d8cfc4;
+  background: #f3ede4;
+  color: #7a5c3e;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex: none;
+}
+
+.bills-list__meta {
+  font-size: 11.5px;
+  color: #6b6f64;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bills-list__date {
+  flex: 0 0 120px;
+  font-size: 12.5px;
+  color: #5c6055;
+  font-variant-numeric: tabular-nums;
+}
+
+.bills-list__amount {
+  flex: 0 0 130px;
+  text-align: right;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bills-list__empty {
+  border: 1px dashed #ddddd4;
+  border-radius: 18px;
+  margin-top: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: bills-list-flash-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.bills-list__empty-note {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #6b6f64;
+  max-width: 420px;
+}
+
+.bills-list__empty-cta {
+  border: 1px solid #ddddd4;
+  background: #ffffff;
+  color: #14150f;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.bills-list__empty-cta:hover {
+  border-color: #14150f;
+}
+
+.bills-list__footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #ecece4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bills-list__range {
+  font-size: 12px;
+  color: #6b6f64;
+  font-variant-numeric: tabular-nums;
+}
+
+.bills-list__pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bills-list__nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e6e6de;
+  background: #ffffff;
+  border-radius: 13px;
+  font-size: 14px;
+  color: #14150f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.bills-list__nav:disabled {
+  color: #c2c6ba;
+  cursor: not-allowed;
+}
+
+.bills-list__nav:not(:disabled):hover {
+  border-color: #14150f;
+}
+
+.bills-list__num {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1.5px solid #e6e6de;
+  background: #ffffff;
+  color: #14150f;
+  border-radius: 13px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease,
+    border-color 180ms ease;
+}
+
+.bills-list__num--on {
+  border-color: #14150f;
+  background: #14150f;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bills-list__num:not(.bills-list__num--on):hover {
+  border-color: #14150f;
+}
+
+.bills-list__gap {
+  min-width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: #9a9e92;
+}
+
+@keyframes bills-list-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The design hides the date column on small phones. */
+@media (max-width: 560px) {
+  .bills-list__col-date,
+  .bills-list__date {
+    display: none;
+  }
+}

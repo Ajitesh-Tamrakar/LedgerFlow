@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from accountancy.api.converters import DateConverter
 from accountancy.api.views import (
-    BillViewSet, BusinessView, CashbookByDateView, CashbookListView,
+    BillPurchasesView, BillViewSet, BusinessView, CashbookByDateView, CashbookListView,
     CollectionTrendView, DashboardSummaryView, DealerViewSet, PaymentViewSet, TaskViewSet,
 )
 
@@ -15,7 +15,12 @@ router.register("tasks", TaskViewSet, basename="task")
 router.register("bills", BillViewSet, basename="bill")
 router.register("payments", PaymentViewSet, basename="payment")
 
-urlpatterns = router.urls + [
+urlpatterns = [
+    # This exact path must sit BEFORE the router: the router's bills/{pk}/
+    # detail regex ([^/.]+) would otherwise swallow "purchases" and hand it
+    # to the CRUD viewset as an (invalid) id.
+    path("bills/purchases/", BillPurchasesView.as_view(), name="bill-purchases"),
+] + router.urls + [
     path("business/", BusinessView.as_view(), name="business"),
     path("cashbook/", CashbookListView.as_view(), name="cashbook-list"),
     path("cashbook/by-date/<date:date>/", CashbookByDateView.as_view(), name="cashbook-by-date"),

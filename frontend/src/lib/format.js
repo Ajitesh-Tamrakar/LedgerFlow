@@ -126,6 +126,22 @@ export function formatDay(iso) {
 }
 
 /*
+ * A file size in bytes to the design's reading: 2516582 -> "2.4 MB".
+ * The bill rows' meta line and the upload count line use it. Missing is
+ * not zero: a null/unknown size reads "" so the caller can drop the part
+ * instead of printing "0.0 MB".
+ */
+export function formatMb(bytes) {
+    const number = Number(bytes);
+
+    if (bytes === null || bytes === undefined || !Number.isFinite(number) || number < 0) {
+        return "";
+    }
+
+    return (number / 1048576).toFixed(1) + " MB";
+}
+
+/*
  * Percent with an explicit sign, e.g. 25 -> "+25.0%", -12.34 -> "−12.3%".
  * The design uses a typographic minus, and the API sends null when there
  * is no baseline to compare against -- that reads as "—".

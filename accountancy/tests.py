@@ -1,7 +1,9 @@
+import os
 import re
 import shutil
 import tempfile
 from datetime import date
+from io import BytesIO
 from unittest import mock
 
 from django.contrib.auth import get_user_model
@@ -9,6 +11,7 @@ from django.core import mail
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
@@ -278,6 +281,15 @@ def a_pdf(name='bill.pdf', size=32):
     return SimpleUploadedFile(name, b'%PDF-1.4\n' + b'0' * size, content_type='application/pdf')
 
 
+def a_png(name='page.png', color=(200, 60, 60)):
+    """A real (tiny) PNG, so the images -> PDF compile path can open it."""
+    from PIL import Image
+
+    buffer = BytesIO()
+    Image.new("RGB", (8, 8), color).save(buffer, format="PNG")
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type="image/png")
+
+
 class DealerAPITests(TestCase):
     LIST = '/api/dealers/'
 
@@ -506,6 +518,198 @@ class BillAPITests(TestCase):
         self.assertEqual(self.client.get(self.LIST).data['count'], 2)                     # B's excluded
         self.assertEqual(self.client.get(self.LIST, {'date_from': '2026-03-01'}).data['count'], 1)
         self.assertEqual(self.client.get(self.LIST, {'dealer': self.dealer_a.pk}).data['count'], 2)
+
+    # --- the photo-pages path: images -> one compiled PDF ---
+    def test_create_from_photo_pages_compiles_one_pdf(self):
+        resp = self.client.post(self.LIST, {
+            'images': [a_png('a.png'), a_png('b.png', color=(10, 120, 10))],
+            'dealer': self.dealer_a.pk, 'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 201, resp.data)
+        self.assertEqual(resp.data['pages'], 2)
+        self.assertIsInstance(resp.data['file_size'], int)
+        self.assertGreater(resp.data['file_size'], 0)
+        bill = Bill.objects.get()
+        self.assertEqual(bill.pages, 2)
+        self.assertEqual(bill.image.open('rb').read(4), b'%PDF')   # really a PDF
+
+    def test_create_with_both_image_and_images_rejected(self):
+        resp = self.create_bill(images=[a_png('a.png')])            # image present by default
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('Not both', str(resp.data))
+
+    def test_create_without_any_file_rejected(self):
+        resp = self.client.post(self.LIST, {
+            'dealer': self.dealer_a.pk, 'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('image', resp.data)
+
+    # --- page validation: the accepted set, HEIC called out by name ---
+    def test_heic_page_rejected_names_the_format(self):
+        heic = SimpleUploadedFile('photo.heic', b'\x00' * 32, content_type='image/heic')
+        resp = self.client.post(self.LIST, {
+            'images': [heic], 'dealer': self.dealer_a.pk,
+            'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        message = str(resp.data['images'])
+        self.assertIn('HEIC/HEIF', message)
+        self.assertIn('PDF', message)                              # the accepted list
+        self.assertIn('WEBP', message)
+
+    def test_heic_extension_caught_even_with_bogus_content_type(self):
+        heic = SimpleUploadedFile('photo.heic', b'\x00' * 32, content_type='application/octet-stream')
+        resp = self.client.post(self.LIST, {
+            'images': [heic], 'dealer': self.dealer_a.pk,
+            'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('HEIC/HEIF', str(resp.data['images']))
+
+    def test_non_image_page_rejected(self):
+        text = SimpleUploadedFile('notes.txt', b'hello', content_type='text/plain')
+        resp = self.client.post(self.LIST, {
+            'images': [text], 'dealer': self.dealer_a.pk,
+            'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('PDF', str(resp.data['images']))
+
+    @override_settings(MAX_BILL_UPLOAD_BYTES=64)
+    def test_oversize_pages_rejected(self):
+        resp = self.client.post(self.LIST, {
+            'images': [a_png('a.png'), a_png('b.png', color=(10, 120, 10))],
+            'dealer': self.dealer_a.pk, 'date': '2026-02-01', 'amount': '150.00',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('too large', str(resp.data['images']))
+
+    # --- the API's amount floor is strictly greater than zero ---
+    def test_zero_amount_rejected(self):
+        for value in ('0', '0.00'):
+            resp = self.create_bill(amount=value)
+            self.assertEqual(resp.status_code, 400, (value, resp.data))
+            self.assertIn('amount', resp.data)
+
+    def test_missing_amount_rejected(self):
+        resp = self.client.post(self.LIST, {
+            'image': a_pdf(), 'dealer': self.dealer_a.pk, 'date': '2026-02-01',
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('amount', resp.data)
+
+    # --- file replacement: a new source in, the old file out ---
+    def test_file_replacement_via_pages(self):
+        bill_id = self.create_bill().data['id']
+        before = len(_media_files())
+        resp = self.client.patch(f'{self.LIST}{bill_id}/', {
+            'images': [a_png('x.png'), a_png('y.png', color=(1, 2, 3))],
+        }, format='multipart')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        self.assertEqual(resp.data['pages'], 2)
+        self.assertEqual(len(_media_files()), before)   # old file removed, one stored
+
+    def test_pdf_replacement_forgets_page_count(self):
+        resp = self.client.post(self.LIST, {
+            'images': [a_png('a.png')], 'dealer': self.dealer_a.pk,
+            'date': '2026-02-01', 'amount': '10.00',
+        }, format='multipart')
+        bill_id = resp.data['id']
+        self.assertEqual(resp.data['pages'], 1)
+        resp = self.client.patch(f'{self.LIST}{bill_id}/', {'image': a_pdf()},
+                                 format='multipart')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        self.assertIsNone(resp.data['pages'])           # a dropped-in PDF: can't count
+
+    def test_metadata_only_patch_keeps_file_and_pages(self):
+        resp = self.client.post(self.LIST, {
+            'images': [a_png('a.png')], 'dealer': self.dealer_a.pk,
+            'date': '2026-02-01', 'amount': '10.00',
+        }, format='multipart')
+        bill = Bill.objects.get(pk=resp.data['id'])
+        stored_name = bill.image.name
+        resp = self.client.patch(f'{self.LIST}{bill.pk}/', {'amount': '200.00'}, format='json')
+        self.assertEqual(resp.status_code, 200, resp.data)
+        bill.refresh_from_db()
+        self.assertEqual(bill.image.name, stored_name)  # the file is untouched
+        self.assertEqual(bill.pages, 1)
+
+    # --- the rows carry what the list screen renders ---
+    def test_list_rows_carry_dealer_status_and_file_size(self):
+        self.create_bill()
+        self.dealer_a.is_active = False
+        self.dealer_a.save()
+        row = self.client.get(self.LIST).data['results'][0]
+        self.assertFalse(row['dealer_active'])
+        self.assertIsInstance(row['file_size'], int)
+        self.assertIsNone(row['pages'])                 # created from a PDF
+
+
+def _media_files():
+    found = []
+    for _root, _dirs, files in os.walk(_BILL_MEDIA):
+        found.extend(os.path.join(_root, name) for name in files)
+    return found
+
+
+@override_settings(MEDIA_ROOT=_BILL_MEDIA)
+class BillPurchasesAPITests(TestCase):
+    """The Bills page's purchases summary: scoping, shape, the per-dealer split."""
+
+    URL = '/api/bills/purchases/'
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(_BILL_MEDIA, ignore_errors=True)
+        super().tearDownClass()
+
+    def setUp(self):
+        self.a = User.objects.create_user('pa', 'pa@example.com', 'pw')
+        self.biz_a = Business.objects.create(name='A Traders', owner=self.a)
+        self.b = User.objects.create_user('pb', 'pb@example.com', 'pw')
+        self.biz_b = Business.objects.create(name='B Traders', owner=self.b)
+        self.dealer_a = Dealer.objects.create(name='Acme', business=self.biz_a)
+        self.dealer_a2 = Dealer.objects.create(name='Globex', business=self.biz_a)
+        self.dealer_b = Dealer.objects.create(name='Initech', business=self.biz_b)
+        self.client = APIClient()
+        as_user(self.client, self.a)
+
+    def create_bill(self, dealer, when, amount):
+        Bill.objects.create(image=a_pdf(), date=when, dealer=dealer,
+                            business=dealer.business, amount=amount)
+
+    def test_summary_scoped_total_count_and_breakdown(self):
+        today = timezone.localdate()
+        first = today.replace(day=1)
+        self.create_bill(self.dealer_a, first, '1000.00')
+        self.create_bill(self.dealer_a, today, '250.50')
+        self.create_bill(self.dealer_a2, first, '400.00')
+        self.create_bill(self.dealer_b, first, '9999.00')    # other tenant
+
+        resp = self.client.get(self.URL)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.data
+        self.assertEqual(data['period'], 'month')
+        self.assertEqual(data['label'], first.strftime('%B'))
+        self.assertEqual(data['start'], str(first))
+        self.assertEqual(data['count'], 3)
+        self.assertEqual(data['total'], '1650.50')
+        self.assertEqual([row['id'] for row in data['dealers']],
+                         [self.dealer_a.pk, self.dealer_a2.pk])
+        self.assertEqual([row['name'] for row in data['dealers']], ['Acme', 'Globex'])
+        self.assertEqual([row['total'] for row in data['dealers']], ['1250.50', '400.00'])
+
+    def test_empty_period_reads_zero(self):
+        data = self.client.get(self.URL).data
+        self.assertEqual(data['total'], '0.00')
+        self.assertEqual(data['count'], 0)
+        self.assertEqual(data['dealers'], [])
+
+    def test_invalid_period_rejected(self):
+        resp = self.client.get(self.URL, {'period': 'year'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('period', resp.data)
 
 
 class PaymentAPITests(TestCase):
