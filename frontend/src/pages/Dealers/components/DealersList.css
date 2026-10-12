@@ -1,0 +1,469 @@
+.dealers-list {
+  gap: 12px;
+  min-height: 500px;
+}
+
+.dealers-list__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dealers-list__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.dealers-list__hint {
+  font-size: 12px;
+  color: #6B6F64;
+}
+
+/* The design's short-lived confirmation banner. */
+.dealers-list__flash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: #F3F3ED;
+  border: 1px solid #E2E2DA;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 13px;
+  animation: dealers-list-flash-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dealers-list__flash > span {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #14150F;
+}
+
+.dealers-list__table {
+  display: flex;
+  flex-direction: column;
+}
+
+.dealers-list__cols {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px 10px;
+  border-bottom: 1px solid #ECECE4;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9A9E92;
+}
+
+.dealers-list__col-name {
+  flex: 1 1 90px;
+  min-width: 0;
+}
+
+.dealers-list__col-gst {
+  flex: 0 0 132px;
+}
+
+.dealers-list__col-bal {
+  flex: 0 0 130px;
+  text-align: right;
+}
+
+.dealers-list__col-action {
+  flex: 0 0 84px;
+  text-align: right;
+}
+
+.dealers-list__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #F3F3EC;
+  border-radius: 12px;
+  background: transparent;
+  transition: background 180ms ease;
+}
+
+.dealers-list__row:hover {
+  background: #FAFAF6;
+}
+
+.dealers-list__row--selected,
+.dealers-list__row--selected:hover {
+  background: #F3F3ED;
+}
+
+/* Two identical keyframes, A and B: `gen` flips the class so the stagger
+   replays (the design's rowA/rowB). */
+.dealers-list__row--a {
+  animation: dealers-list-row-a 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dealers-list__row--b {
+  animation: dealers-list-row-b 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes dealers-list-row-a {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dealers-list-row-b {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dealers-list__open {
+  flex: 1 1 90px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 12px 4px;
+  min-height: 44px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.dealers-list__chip {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  flex: none;
+  transition: background 240ms ease;
+}
+
+.dealers-list__row--active .dealers-list__chip {
+  background: #D8F14B;
+  color: #14150F;
+}
+
+.dealers-list__row--retired .dealers-list__chip {
+  background: #F3F3ED;
+  color: #9A9E92;
+}
+
+.dealers-list__row--selected .dealers-list__chip {
+  background: #14150F;
+  color: #FFFFFF;
+}
+
+.dealers-list__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dealers-list__name {
+  font-size: 14.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #14150F;
+}
+
+.dealers-list__row--retired .dealers-list__name {
+  color: #6B6F64;
+}
+
+.dealers-list__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #6B6F64;
+}
+
+.dealers-list__row--retired .dealers-list__state {
+  color: #9A9E92;
+}
+
+.dealers-list__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #14150F;
+  transition: background 220ms ease;
+}
+
+.dealers-list__row--retired .dealers-list__dot {
+  background: #C0C4B7;
+}
+
+.dealers-list__gst {
+  flex: 0 0 132px;
+  font-size: 11.5px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dealers-list__balwrap {
+  flex: 0 0 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.dealers-list__bal {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+  font-variant-numeric: tabular-nums;
+  color: #14150F;
+}
+
+.dealers-list__bal--credit {
+  color: #9B3225;
+}
+
+.dealers-list__bal--settled {
+  color: #6B6F64;
+}
+
+.dealers-list__bal--owed {
+  color: #14150F;
+}
+
+/* Retired rows dim their figure (red kept for credit). */
+.dealers-list__bal--dim {
+  color: #8A8E83;
+}
+
+.dealers-list__tag {
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dealers-list__tag--credit {
+  border: 1px solid #E7C9C1;
+  background: #FBEFEC;
+  color: #7A2418;
+}
+
+.dealers-list__tag--settled {
+  border: 1px solid #E2E2DA;
+  background: #F3F3ED;
+  color: #6B6F64;
+}
+
+.dealers-list__tag--owed {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #5C6055;
+}
+
+.dealers-list__action {
+  flex: 0 0 84px;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 4px;
+}
+
+.dealers-list__toggle {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #5C6055;
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.dealers-list__toggle:hover {
+  border-color: #14150F;
+  color: #14150F;
+}
+
+.dealers-list__toggle:active {
+  transform: scale(0.97);
+}
+
+.dealers-list__empty {
+  border: 1px dashed #DDDDD4;
+  border-radius: 18px;
+  margin-top: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: dealers-list-flash-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dealers-list__empty-note {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #6B6F64;
+  max-width: 380px;
+}
+
+.dealers-list__empty-cta {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #14150F;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dealers-list__empty-cta:hover {
+  border-color: #14150F;
+}
+
+.dealers-list__footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #ECECE4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dealers-list__range {
+  font-size: 12px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+}
+
+.dealers-list__pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dealers-list__nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #E6E6DE;
+  background: #FFFFFF;
+  border-radius: 13px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #14150F;
+  cursor: pointer;
+}
+
+.dealers-list__nav:disabled {
+  color: #C5C7BE;
+  cursor: default;
+}
+
+.dealers-list__nav:not(:disabled):hover {
+  border-color: #14150F;
+}
+
+.dealers-list__num {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1.5px solid #E6E6DE;
+  background: #FFFFFF;
+  color: #14150F;
+  border-radius: 13px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease,
+    border-color 180ms ease;
+}
+
+.dealers-list__num--on {
+  border-color: #14150F;
+  background: #14150F;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.dealers-list__num:not(.dealers-list__num--on):hover {
+  background: #F3F3ED;
+}
+
+.dealers-list__gap {
+  min-width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: #9A9E92;
+}
+
+/* The design hides the GSTIN column on small phones. */
+@media (max-width: 560px) {
+  .dealers-list__col-gst,
+  .dealers-list__gst {
+    display: none;
+  }
+}
+
+@keyframes dealers-list-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

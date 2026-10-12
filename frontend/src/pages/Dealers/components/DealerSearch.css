@@ -1,0 +1,212 @@
+/* White wide card; the .card base already paints it, so this file only
+   styles the inner parts. The two-column span comes from Dealers.css
+   (.card--wide). */
+
+.dealer-search__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* The design's pill titles are DM Sans (they inherit the body face there),
+   even though app headings default to Space Grotesk. */
+.dealer-search__title {
+  border: 1px solid #DDDDD4;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C6055;
+  white-space: nowrap;
+}
+
+.dealer-search__count {
+  font-size: 12px;
+  color: #6B6F64;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Two identical keyframes, A and B: the element persists, so the class
+   must change for the pop to play again. Same as the design's anim(). */
+.dealer-search__count--a {
+  animation: dealer-search-pop-a 340ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.dealer-search__count--b {
+  animation: dealer-search-pop-b 340ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes dealer-search-pop-a {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dealer-search-pop-b {
+  from {
+    opacity: 0.35;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dealer-search__box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #DDDDD4;
+  border-radius: 16px;
+  padding: 0 8px 0 16px;
+  height: 56px;
+  background: #FAFAF6;
+  transition: border-color 180ms ease;
+}
+
+.dealer-search__box--active {
+  border-color: #14150F;
+}
+
+.dealer-search__box:focus-within {
+  outline: 2px solid #14150F;
+  outline-offset: 2px;
+}
+
+.dealer-search__icon {
+  color: #6B6F64;
+  font-size: 16px;
+}
+
+.dealer-search__box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  color: #14150F;
+}
+
+.dealer-search__box input:focus-visible {
+  outline: none; /* the box itself shows focus */
+}
+
+.dealer-search__box input::placeholder {
+  color: #9A9E92;
+}
+
+.dealer-search__clear {
+  border: 1px solid #DDDDD4;
+  background: #FFFFFF;
+  color: #5C6055;
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 13px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dealer-search__clear:hover {
+  border-color: #14150F;
+  color: #14150F;
+}
+
+.dealer-search__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.dealer-search__tabs {
+  display: flex;
+  gap: 4px;
+  background: #F3F3ED;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.dealer-search__tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: #5C6055;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.dealer-search__tab--on {
+  background: #14150F;
+  color: #FFFFFF;
+}
+
+.dealer-search__tab-count {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #9A9E92;
+}
+
+.dealer-search__tab--on .dealer-search__tab-count {
+  color: #A8AD9F;
+}
+
+.dealer-search__sorts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.dealer-search__sort-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B6F64;
+}
+
+.dealer-search__sort {
+  border: 1px solid #E6E6DE;
+  background: #FFFFFF;
+  color: #6B6F64;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease,
+    color 180ms ease;
+}
+
+.dealer-search__sort--on {
+  border-color: #14150F;
+  background: #F3F3ED;
+  color: #14150F;
+}
+
+.dealer-search__sort:hover {
+  border-color: #14150F;
+}

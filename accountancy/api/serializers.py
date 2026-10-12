@@ -16,11 +16,19 @@ class DealerScopedMixin:
 
 
 class DealerSerializer(serializers.ModelSerializer):
+    # Computed, not stored: opening balance + everything billed to this
+    # dealer - everything paid to them, all time. The viewset's queryset
+    # annotation supplies it (one SQL pass); it is declared here only so
+    # the response carries a proper string money value. Never an input.
+    outstanding_balance = serializers.DecimalField(
+        max_digits=14, decimal_places=2, read_only=True
+    )
+
     class Meta:
         model = Dealer
         fields = [
-            "id", "name", "gstin", "opening_balance", "is_active",
-            "created_at", "updated_at",
+            "id", "name", "gstin", "opening_balance", "outstanding_balance",
+            "is_active", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 

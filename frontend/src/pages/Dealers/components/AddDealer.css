@@ -1,0 +1,219 @@
+/* The design's lavender panel. Overrides the white .card base (this file
+   loads after Card.css, so same-specificity rules here win). */
+.add-dealer {
+  background: #DCD9F5;
+  border: none;
+  gap: 14px;
+  min-height: 500px;
+}
+
+.add-dealer__title {
+  align-self: flex-start;
+  border: 1px solid rgba(20, 21, 15, 0.2);
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.add-dealer__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.add-dealer__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #474463;
+}
+
+.add-dealer__box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(20, 21, 15, 0.18);
+  border-radius: 14px;
+  padding: 0 14px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.75);
+  transition: border-color 180ms ease;
+}
+
+.add-dealer__box--invalid {
+  border-color: #9B3225;
+}
+
+.add-dealer__box:focus-within {
+  outline: 2px solid #14150F;
+  outline-offset: 2px;
+}
+
+.add-dealer__box input {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  font-size: 14.5px;
+  color: #14150F;
+}
+
+.add-dealer__box input:focus-visible {
+  outline: none; /* the box itself shows focus */
+}
+
+.add-dealer__gstin {
+  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.add-dealer__symbol {
+  color: #6B6F64;
+  font-size: 16px;
+}
+
+.add-dealer__balance {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.add-dealer__note {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #474463;
+}
+
+.add-dealer__note--warn {
+  color: #7A2418;
+}
+
+.add-dealer__field-error {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #7A2418;
+}
+
+.add-dealer__switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(20, 21, 15, 0.15);
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  min-height: 50px;
+  padding: 0 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.add-dealer__switch:hover {
+  border-color: #14150F;
+}
+
+.add-dealer__track {
+  width: 40px;
+  height: 23px;
+  border-radius: 999px;
+  background: rgba(20, 21, 15, 0.22);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: background 220ms ease;
+}
+
+.add-dealer__track--on {
+  background: #14150F;
+}
+
+.add-dealer__knob {
+  width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  transform: translateX(0);
+  transition: transform 240ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.add-dealer__knob--on {
+  transform: translateX(17px);
+}
+
+.add-dealer__switch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.add-dealer__switch-text > :first-child {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.add-dealer__switch-note {
+  font-size: 11.5px;
+  color: #474463;
+}
+
+.add-dealer__footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-dealer__cta {
+  border: 0;
+  background: #14150F;
+  color: #FFFFFF;
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, transform 140ms ease;
+}
+
+.add-dealer__cta:not(:disabled):hover {
+  background: #2A2C22;
+}
+
+.add-dealer__cta:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.add-dealer__cta--busy {
+  animation: add-dealer-breathe 1100ms ease-in-out infinite;
+}
+
+.add-dealer__cta--blocked {
+  background: #9A9C93;
+  cursor: not-allowed;
+}
+
+.add-dealer__footnote {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #3B3956;
+}
+
+@keyframes add-dealer-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}

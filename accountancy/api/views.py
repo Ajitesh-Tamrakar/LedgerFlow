@@ -2,10 +2,11 @@ from calendar import monthrange
 from datetime import date, timedelta
 from decimal import Decimal
 
-from django.db.models import Sum
-from django.db.models.functions import TruncDay, TruncWeek
+from django.db.models import DecimalField, F, OuterRef, Subquery, Sum
+from django.db.models.functions import Coalesce, TruncDay, TruncWeek
 from django.http import FileResponse, Http404
 from django.utils import timezone
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveUpdateAPIView
@@ -26,6 +27,68 @@ class DealerViewSet(BusinessScopedViewSet):
     filterset_class = DealerFilter
     ordering = ["name"]  # default sort when ?ordering= is absent (pagination needs one)
     ordering_fields = ["name", "created_at", "updated_at"]
+
+    def get_queryset(self):
+        """Scope, then hand every dealer its running balance:
+        opening + everything billed to them - everything paid to them.
+
+        Each side is its own correlated subquery, deliberately: two
+        multi-table aggregates in one query would join bills AND payments
+        together and multiply -- a dealer with 6 bills and 3 payments
+        would be summed 18 times. As separate subqueries each side is
+        computed in its own table, so a 40-dealer page costs 2 passes per
+        row, no joins, no multiplication. A dealer with no bills or
+        payments reads 0 for that side through the Coalesce. Not a DB
+        column -- nothing on the model changes."""
+        return super().get_queryset().annotate(
+            billed_total=Coalesce(
+                Subquery(
+                    Bill.objects.filter(dealer=OuterRef("pk"))
+                    .values("dealer")
+                    .annotate(total=Sum("amount"))
+                    .values("total"),
+                    output_field=DecimalField(max_digits=14, decimal_places=2),
+                ),
+                Decimal("0.00"),
+            ),
+            paid_total=Coalesce(
+                Subquery(
+                    Payment.objects.filter(dealer=OuterRef("pk"))
+                    .values("dealer")
+                    .annotate(total=Sum("amount"))
+                    .values("total"),
+                    output_field=DecimalField(max_digits=14, decimal_places=2),
+                ),
+                Decimal("0.00"),
+            ),
+        ).annotate(
+            outstanding_balance=F("opening_balance") + F("billed_total") - F("paid_total")
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        # A freshly saved row never passed through the annotated queryset,
+        # so its balance figure isn't computed yet. Re-read it: the 201
+        # receipt must show the real number (a new dealer's is its opening
+        # balance, having no bills or payments yet).
+        fresh = self.get_queryset().get(pk=serializer.instance.pk)
+        data = self.get_serializer(fresh).data
+        headers = self.get_success_headers(data)
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        """PUT is disabled on the base, so only PATCH ever reaches here.
+        Re-read the row after saving: .save() refreshes the stored columns
+        but not the annotation, which was computed when the row was fetched."""
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        fresh = self.get_queryset().get(pk=instance.pk)
+        return Response(self.get_serializer(fresh).data)
 
 
 class TaskViewSet(BusinessScopedViewSet):
