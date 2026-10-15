@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
@@ -14,6 +14,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* The domain root: without a route for "/" the router matches
+            nothing and the page stays white (it hid in dev because we
+            always opened /login directly). */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -22,7 +26,10 @@ function App() {
         <Route path="/cashbook" element={<Cashbook/>}/>
         <Route path="/dealers" element={<Dealers/>}/>
         <Route path="/settings" element={<Settings />}/>
-        <Route path="/bills" element={<Bills/>}/>        
+        <Route path="/bills" element={<Bills/>}/>
+        {/* Unknown deep links (Django serves the SPA for any path) get the
+            same treatment instead of a white screen. */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
