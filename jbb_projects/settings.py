@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import logging
 from datetime import timedelta
 from os import getenv
 from pathlib import Path
@@ -212,8 +213,35 @@ OTP = {
     "PASSWORD_RESET_TTL_MINUTES": 10,
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # dev only
-DEFAULT_FROM_EMAIL = "LedgerFlow <no-reply@ledgerflow.local>"
+# Email. Dev stays on the console backend (OTP codes print to the terminal);
+# the deploy environment opts into SMTP, e.g.
+#   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+#   EMAIL_HOST=smtp.resend.com EMAIL_PORT=587 EMAIL_USE_TLS=1
+#   EMAIL_HOST_USER=resend EMAIL_HOST_PASSWORD=...
+#   DEFAULT_FROM_EMAIL="LedgerFlow <no-reply@yourdomain.com>"
+EMAIL_BACKEND = getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = getenv("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(getenv("EMAIL_PORT", "1025"))
+EMAIL_USE_SSL = getenv("EMAIL_USE_SSL", "0").strip().lower() in ("1", "true", "yes")
+EMAIL_USE_TLS = getenv("EMAIL_USE_TLS", "0").strip().lower() in ("1", "true", "yes")
+EMAIL_HOST_USER = getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = getenv(
+    "DEFAULT_FROM_EMAIL", "LedgerFlow <no-reply@ledgerflow.local>"
+)
+
+if not DEBUG and EMAIL_BACKEND.endswith("console.EmailBackend"):
+    # Login is email-only and verification is mandatory -- with the console
+    # backend in production the codes go to the gunicorn log, so users can
+    # never verify and every login silently fails.
+    logging.getLogger(__name__).warning(
+        "EMAIL_BACKEND is the console backend with DEBUG off -- "
+        "verification codes are printed to the log, not emailed. "
+        "Set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend "
+        "plus EMAIL_HOST/EMAIL_PORT/EMAIL_HOST_USER/EMAIL_HOST_PASSWORD."
+    )
 
 
 # Internationalization
