@@ -18,6 +18,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Where runtime data lives (SQLite db, uploaded bill PDFs). Defaults to the
+# repo root in dev; the deploy points it at a persistent volume so data
+# survives redeploys (e.g. DJANGO_DATA_DIR=/data on Railway).
+DATA_DIR = Path(getenv("DJANGO_DATA_DIR", BASE_DIR))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -83,6 +88,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -118,7 +124,7 @@ WSGI_APPLICATION = "jbb_projects.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": DATA_DIR / "db.sqlite3",
     }
 }
 
@@ -261,9 +267,14 @@ USE_TZ = True
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "/static/"
+# The built React app (frontend/dist) is collected into STATIC_ROOT and served
+# by WhiteNoise -- that is how one container serves both the SPA and the API.
+# Skipped while the directory does not exist (fresh dev checkout).
+_dist = BASE_DIR / "frontend" / "dist"
+STATICFILES_DIRS = [_dist] if _dist.is_dir() else []
 
 
-MEDIA_ROOT = BASE_DIR / "uploads"
+MEDIA_ROOT = DATA_DIR / "uploads"
 MEDIA_URL = "/bill_imgs/"
 
 # Default primary key field type
