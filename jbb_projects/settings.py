@@ -160,8 +160,8 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     "USE_JWT": True,
     "SESSION_LOGIN": False,
-    "REGISTER_SERIALIZER": "accountancy.serializers.CustomRegisterSerializer",
-    "USER_DETAILS_SERIALIZER": "accountancy.serializers.CustomUserDetailsSerializer",  # nests `business`
+    "REGISTER_SERIALIZER": "accountancy.auth_serializers.CustomRegisterSerializer",
+    "USER_DETAILS_SERIALIZER": "accountancy.auth_serializers.CustomUserDetailsSerializer",  # nests `business`
     # dj-rest-auth's default is False, and with it off the serializer
     # POPS the old_password field -- the change then went through without
     # checking the current password at all (any live JWT could reset it).
