@@ -22,12 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-h98la@y^5olz%s)#8xxghd$55+%$p)o&p3(jmxfsyovq1&%@t7"
+# Set DJANGO_SECRET_KEY in the deploy environment (e.g.
+# `openssl rand -base64 50`); the dev fallback below keeps local runs working.
+SECRET_KEY = getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-h98la@y^5olz%s)#8xxghd$55+%$p)o&p3(jmxfsyovq1&%@t7",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = getenv("IS_DEVELOPMENT", True)
-
-ALLOWED_HOSTS = [getenv("APP_HOST", "localhost")]
+# Parsed as a real boolean -- a plain getenv would make the string
+# "false" truthy and silently run debug mode in production.
+DEBUG = getenv("IS_DEVELOPMENT", "true").strip().lower() in ("1", "true", "yes")
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -41,9 +46,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+# Comma-separated, e.g. APP_HOSTS="ledgerflow.com,www.ledgerflow.com"
+# (add the bare domain too -- browsers sometimes strip "www").
 ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
+    host.strip()
+    for host in getenv("APP_HOSTS", "127.0.0.1,localhost").split(",")
+    if host.strip()
 ]
 # Application definition
 

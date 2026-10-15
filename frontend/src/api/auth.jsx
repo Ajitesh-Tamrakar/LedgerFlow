@@ -1,6 +1,7 @@
 import { refreshAccessToken } from "./tokenRefresh";
 
-export const API_BASE_URL = "http://127.0.0.1:8000/api";
+// Re-exported so the other api/* modules can keep importing from here.
+export { API_BASE_URL } from "./config";
 
 
 export async function apiRequest(endpoint, options = {}, retry = true) {
