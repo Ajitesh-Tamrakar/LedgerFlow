@@ -1,7 +1,9 @@
 import { refreshAccessToken } from "./tokenRefresh";
 
-// Re-exported so the other api/* modules can keep importing from here.
-export { API_BASE_URL } from "./config";
+// Imported (so apiRequest below can use it) and re-exported (so the other
+// api/* modules keep importing it from here).
+import { API_BASE_URL } from "./config";
+export { API_BASE_URL };
 
 
 export async function apiRequest(endpoint, options = {}, retry = true) {
