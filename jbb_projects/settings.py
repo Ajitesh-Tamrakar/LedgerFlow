@@ -14,6 +14,7 @@ import logging
 from datetime import timedelta
 from os import getenv
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,16 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(getenv("DJANGO_DATA_DIR", BASE_DIR))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Set DJANGO_SECRET_KEY in the deploy environment (e.g.
-# `openssl rand -base64 50`); the dev fallback below keeps local runs working.
-SECRET_KEY = getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-h98la@y^5olz%s)#8xxghd$55+%$p)o&p3(jmxfsyovq1&%@t7",
-)
+# SECURITY: loaded from environment variable. Will crash at startup
+# if DJANGO_SECRET_KEY is not set. Set it in your deploy platform
+# and in .env for local dev (see .gitignore).
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Parsed as a real boolean -- a plain getenv would make the string
@@ -184,8 +181,8 @@ REST_AUTH = {
     # enable it explicitly.
     "OLD_PASSWORD_FIELD_ENABLED": True,
     "TOKEN_MODEL": None,  # JWT-only; not using DRF's legacy authtoken model
-    "JWT_AUTH_HTTPONLY": True, 
-    "JWT_AUTH_REFRESH_COOKIE":'ledgerflow_refresh'
+    "JWT_AUTH_HTTPONLY": True,
+    "JWT_AUTH_REFRESH_COOKIE": "ledgerflow_refresh",
 }
 
 SIMPLE_JWT = {
