@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
+    "anymail",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -243,15 +244,22 @@ OTP = {
     "PASSWORD_RESET_TTL_MINUTES": 10,
 }
 
-# Email. Dev stays on the console backend (OTP codes print to the terminal);
-# the deploy environment opts into SMTP, e.g.
-#   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-#   EMAIL_HOST=smtp.resend.com EMAIL_PORT=587 EMAIL_USE_TLS=1
-#   EMAIL_HOST_USER=resend EMAIL_HOST_PASSWORD=...
-#   DEFAULT_FROM_EMAIL="LedgerFlow <no-reply@yourdomain.com>"
+# Email. All sending goes through Resend via anymail (HTTPS API, port 443)
+# in every environment: Railway's free/hobby plans block outbound SMTP
+# entirely, while HTTPS is allowed on all plans. Typical env values:
+#   EMAIL_BACKEND=anymail.backends.resend.EmailBackend
+#   ANYMAIL_RESEND_API_KEY=re_...
+#   DEFAULT_FROM_EMAIL=onboarding@resend.dev   (until the domain is
+#   verified in the Resend dashboard, then e.g. no-reply@yourdomain.com)
+# The console backend remains the last-resort fallback when nothing is set,
+# so a misconfigured deploy fails loudly (see the warning below) instead of
+# silently eating verification emails.
 EMAIL_BACKEND = getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
+# Key for the Resend backend (only used when EMAIL_BACKEND points at it).
+# Set ANYMAIL_RESEND_API_KEY=re_... in the deploy.
+ANYMAIL = {"RESEND_API_KEY": getenv("ANYMAIL_RESEND_API_KEY", "")}
 EMAIL_HOST = getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = int(getenv("EMAIL_PORT", "1025"))
 EMAIL_USE_SSL = getenv("EMAIL_USE_SSL", "0").strip().lower() in ("1", "true", "yes")
@@ -269,8 +277,8 @@ if not DEBUG and EMAIL_BACKEND.endswith("console.EmailBackend"):
     logging.getLogger(__name__).warning(
         "EMAIL_BACKEND is the console backend with DEBUG off -- "
         "verification codes are printed to the log, not emailed. "
-        "Set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend "
-        "plus EMAIL_HOST/EMAIL_PORT/EMAIL_HOST_USER/EMAIL_HOST_PASSWORD."
+        "Set EMAIL_BACKEND=anymail.backends.resend.EmailBackend "
+        "plus ANYMAIL_RESEND_API_KEY (HTTPS; works on every Railway plan)."
     )
 
 
