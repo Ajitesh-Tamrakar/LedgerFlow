@@ -12,6 +12,7 @@ Public surface:
 """
 import hashlib
 import hmac
+import logging
 from datetime import timedelta
 from secrets import randbelow
 
@@ -21,6 +22,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from accountancy.models import OTPCode
+
+logger = logging.getLogger(__name__)
 
 _CONF = getattr(settings, 'OTP', {})
 
@@ -155,6 +158,13 @@ def check(email: str, purpose: str, code: str) -> None:
         raise OTPError('Incorrect code.')
 
 
+class EmailSendError(Exception):
+    """Raised when a one-time-code email cannot be delivered (SMTP down,
+    DNS failure, auth rejection, ...). Mapped to a clean 503 response by
+    the DRF exception handler in jbb_projects/exceptions.py -- without the
+    mapping the raw exception would 500 the request and crash the worker."""
+
+
 def send_code_email(email: str, code: str, purpose: str) -> None:
     label = _LABEL[purpose]
     ttl_minutes = int(TTL[purpose].total_seconds() // 60)
@@ -162,9 +172,16 @@ def send_code_email(email: str, code: str, purpose: str) -> None:
         'accountancy/email/otp_code.txt',
         {'code': code, 'label': label, 'ttl_minutes': ttl_minutes},
     )
-    send_mail(
-        subject=f'{label} — one-time code',
-        message=body,
-        from_email=None,  # DEFAULT_FROM_EMAIL
-        recipient_list=[email],
-    )
+    try:
+        send_mail(
+            subject=f'{label} — one-time code',
+            message=body,
+            from_email=None,  # DEFAULT_FROM_EMAIL
+            recipient_list=[email],
+        )
+    except Exception as exc:  # noqa: BLE001 -- map ANY mail failure cleanly
+        logger.exception('Could not send %s email to %s', label, email)
+        raise EmailSendError(
+            'The one-time code could not be emailed right now. '
+            'Please try again in a few minutes.'
+        ) from exc
