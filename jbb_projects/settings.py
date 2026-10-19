@@ -45,8 +45,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 # in a real browser: token refresh works in curl but fails on the page.
 CORS_ALLOW_CREDENTIALS = True
 
+# Comma-separated, e.g. CORS_ALLOWED_ORIGINS="https://ledgerflow.example.com,https://www.example.com"
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    origin.strip()
+    for origin in getenv(
+        "CORS_ALLOWED_ORIGINS", "http://localhost:5173"
+    ).split(",")
+    if origin.strip()
 ]
 
 # Comma-separated, e.g. APP_HOSTS="ledgerflow.com,www.ledgerflow.com"

@@ -28,8 +28,11 @@ COPY . .
 COPY --from=frontend /src/dist ./frontend/dist
 
 # Collect Django admin statics + the built SPA (frontend/dist) into one
-# static root that WhiteNoise serves.
-RUN python manage.py collectstatic --noinput
+# static root that WhiteNoise serves. settings.py requires DJANGO_SECRET_KEY
+# at import time, but build containers don't receive service variables, so
+# supply a throwaway value just for this step. The real key is injected at
+# container runtime and overrides everything baked in here.
+RUN DJANGO_SECRET_KEY=build-time-only python manage.py collectstatic --noinput
 
 EXPOSE 8080
 # Railway injects PORT (default 8080). Migrate against the (persistent)
