@@ -154,17 +154,22 @@ BILL_PROFILES = [
 
 METHODS = ["upi", "upi", "upi", "cash", "cash", "cash", "bank_transfer", "cheque", "card"]
 
+# Kept short on purpose: the dashboard grid floor is a 280px column and the
+# Tasks card eats 22px padding x2 + 1px border x2 + 19px checkbox + 11px gap,
+# leaving ~204px for the title in DM Sans 13.5px. Anything wider clips at the
+# card edge, so every title here measures under 204px (UI-designer sign-off:
+# make the text fit the space, rather than wrapping or truncating).
 TASKS = [
-    ("Chase Gupta & Sons for the delayed payment on INV-1087", False),
-    ("Ask City Traders to reissue invoice INV-2026-0041 -- wrong GSTIN printed", False),
-    ("Finalise the Diwali stock order with Shree Balaji Distributors", False),
+    ("Gupta & Sons: chase INV-1087", False),
+    ("City Traders: reissue invoice", False),
+    ("Finalise the Diwali stock order", False),
     ("File the Q3 GST return", False),
-    ("Reconcile this week's cashbook against the bank statement", False),
-    ("Upload the remaining July purchase bills", True),
-    ("Verify opening balances against the old ledger", True),
-    ("Set up Anand Provision Stores once they re-open in the new market", False),
+    ("Reconcile cashbook and bank", False),
+    ("Upload the July purchase bills", True),
+    ("Verify the opening balances", True),
+    ("Set up Anand Provision Stores", False),
     ("Archive the August bill PDFs", True),
-    ("Compare the UPI settlement report with the cashbook totals", True),
+    ("Match UPI report to cashbook", True),
 ]
 
 
