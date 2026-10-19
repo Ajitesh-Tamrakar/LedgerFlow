@@ -25,10 +25,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(getenv("DJANGO_DATA_DIR", BASE_DIR))
 
 
+def _load_dotenv() -> None:
+    """Load the local, gitignored .env so `runserver` works out of the box.
 
-# SECURITY: loaded from environment variable. Will crash at startup
-# if DJANGO_SECRET_KEY is not set. Set it in your deploy platform
-# and in .env for local dev (see .gitignore).
+    Real environment variables always win (setdefault), so a deploy platform
+    that injects the same names is never overridden by the local file. The
+    .env is gitignored, so it never enters the Docker image.
+    """
+    env_file = BASE_DIR / ".env"
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+
+
+_load_dotenv()
+
+
+# SECURITY: loaded from environment variable (or the local .env via
+# _load_dotenv above). Will crash at startup if DJANGO_SECRET_KEY is not
+# set from either source -- set it in your deploy platform, and in .env
+# for local dev (see .gitignore).
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 
