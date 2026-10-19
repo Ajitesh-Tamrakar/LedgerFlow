@@ -37,6 +37,10 @@ RUN DJANGO_SECRET_KEY=build-time-only python manage.py collectstatic --noinput
 EXPOSE 8080
 # Railway injects PORT (default 8080). Migrate against the (persistent)
 # database, then serve. `exec` keeps gunicorn as PID 1 for clean shutdowns.
+# --timeout 120: a blocked outbound SMTP connection (e.g. a blackholed port)
+# hangs up to Django's 60s socket timeout before failing; the default 30s
+# worker timeout would kill the worker mid-request (502) instead of letting
+# the request finish with a clean 503 from the DRF exception handler.
 CMD sh -c "python manage.py migrate && \
     exec gunicorn jbb_projects.wsgi:application \
-    --bind 0.0.0.0:${PORT:-8080} --workers 3"
+    --bind 0.0.0.0:${PORT:-8080} --workers 3 --timeout 120"
